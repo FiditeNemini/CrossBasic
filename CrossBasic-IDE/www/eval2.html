@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Server Stress Test Eval2</title>
+</head>
+<body>
+  <h1>Server Stress Test - Eval2</h1>
+  <p>This is an additional evaluation page for server stress testing.</p>
+  <button onclick="startTest()">Start Test</button>
+  <div id="results"></div>
+  <script>
+    function startTest() {
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML = 'Starting test...<br>';
+      const numRequests = 500;
+      let completed = 0;
+      let totalTime = 0;
+      let minTime = Infinity;
+      let maxTime = 0;
+      for (let i = 0; i < numRequests; i++) {
+        const start = performance.now();
+        fetch('/eval2.html?dummy=' + i)
+          .then(response => response.text())
+          .then(text => {
+            const end = performance.now();
+            const duration = end - start;
+            totalTime += duration;
+            if (duration < minTime) minTime = duration;
+            if (duration > maxTime) maxTime = duration;
+            completed++;
+            if (completed === numRequests) {
+              const avgTime = totalTime / numRequests;
+              resultsDiv.innerHTML += 'Test completed.<br>';
+              resultsDiv.innerHTML += 'Total Requests: ' + numRequests + '<br>';
+              resultsDiv.innerHTML += 'Average Response Time: ' + avgTime.toFixed(2) + ' ms<br>';
+              resultsDiv.innerHTML += 'Minimum Response Time: ' + minTime.toFixed(2) + ' ms<br>';
+              resultsDiv.innerHTML += 'Maximum Response Time: ' + maxTime.toFixed(2) + ' ms<br>';
+            }
+          })
+          .catch(error => {
+            completed++;
+            if (completed === numRequests) {
+              resultsDiv.innerHTML += 'Test completed with errors.';
+            }
+          });
+      }
+    }
+  </script>
+</body>
+</html>

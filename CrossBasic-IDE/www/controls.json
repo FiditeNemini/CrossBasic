@@ -1,0 +1,322 @@
+{
+  "controls": [
+    {
+      "type": "button",
+      "displayName": "Button",
+      "icon": "/icons/button.png",
+      "default": [
+        { "key": "x", "type": "number", "value": 50 },
+        { "key": "y", "type": "number", "value": 50 },
+        { "key": "w", "type": "number", "value": 100 },
+        { "key": "h", "type": "number", "value": 42 },
+        { "key": "text", "type": "textfield", "value": "Button" },
+        { "key": "name", "type": "textfield", "value": "Button" },
+        { "key": "backgroundColor", "type": "color", "value": "#ffffff" }
+      ],
+      "template": "<button class='ctrl-button'>{text}</button>",
+      "draw": "function draw(ctx, control) { ctx.fillStyle = control.backgroundColor || '#ffffff'; ctx.fillRect(0, 0, control.w, control.h); ctx.strokeStyle = '#000'; ctx.strokeRect(0, 0, control.w, control.h); ctx.fillStyle = '#000'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = '14px sans-serif'; ctx.fillText(control.text, control.w / 2, control.h / 2); }"
+    },
+    {
+      "type": "label",
+      "displayName": "Label",
+      "icon": "/icons/label.png",
+      "default": [
+        { "key": "x", "type": "number", "value": 50 },
+        { "key": "y", "type": "number", "value": 50 },
+        { "key": "w", "type": "number", "value": 100 },
+        { "key": "h", "type": "number", "value": 42 },
+        { "key": "text", "type": "textfield", "value": "Label" },
+        { "key": "name", "type": "textfield", "value": "Label" },
+        { "key": "multiline", "type": "boolean", "value": false }
+      ],
+      "template": "<span class='ctrl-label'>{text}</span>",
+      "draw": "function draw(ctx, control) { ctx.fillStyle = '#000'; ctx.font = '14px sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'top'; if(control.multiline && control.text.indexOf('\\n') !== -1) { var lines = control.text.split('\\n'); for(var i=0;i<lines.length;i++){ ctx.fillText(lines[i], 0, i*16); } } else { ctx.fillText(control.text, 0, 0); } }"
+    },
+    {
+      "type": "textfield",
+      "displayName": "TextField",
+      "icon": "/icons/textfield.png",
+      "default": [
+        { "key": "x", "type": "number", "value": 50 },
+        { "key": "y", "type": "number", "value": 50 },
+        { "key": "w", "type": "number", "value": 150 },
+        { "key": "h", "type": "number", "value": 42 },
+        { "key": "text", "type": "textfield", "value": "TextBox" },
+        { "key": "name", "type": "textfield", "value": "TextBox" }
+      ],
+      "template": "<input type='text' class='ctrl-textbox' value='{text}'/>",
+      "draw": "function draw(ctx, control) { ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, control.w, control.h); ctx.strokeStyle = '#000'; ctx.strokeRect(0, 0, control.w, control.h); ctx.fillStyle = '#000'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.font = '14px sans-serif'; ctx.fillText(control.text, 4, control.h / 2); }"
+    },
+    {
+      "type": "navigationbar",
+      "displayName": "NavigationBar",
+      "icon": "/icons/navigationbar.png",
+      "default": [
+        { "key": "x", "type": "number", "value": 0 },
+        { "key": "y", "type": "number", "value": 0 },
+        { "key": "w", "type": "number", "value": 375 },
+        { "key": "h", "type": "number", "value": 50 },
+        { "key": "text", "type": "textfield", "value": "Navigation" },
+        { "key": "name", "type": "textfield", "value": "NavigationBar" }
+      ],
+      "template": "<div class='ctrl-navigationbar'>{text}</div>",
+      "draw": "function draw(ctx, control) { ctx.fillStyle = '#007bff'; ctx.fillRect(0, 0, control.w, control.h); ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = '16px sans-serif'; ctx.fillText(control.text, control.w/2, control.h/2); }"
+    },
+    {
+      "type": "tabbar",
+      "displayName": "TabBar",
+      "icon": "/icons/tabbar.png",
+      "default": [
+        { "key": "x", "type": "number", "value": 0 },
+        { "key": "y", "type": "number", "value": 617 },
+        { "key": "w", "type": "number", "value": 375 },
+        { "key": "h", "type": "number", "value": 50 },
+        { "key": "text", "type": "textfield", "value": "TabBar" },
+        { "key": "name", "type": "textfield", "value": "TabBar" }
+      ],
+      "template": "<div class='ctrl-tabbar'><div>Tab1</div><div>Tab2</div><div>Tab3</div></div>",
+      "draw": "function draw(ctx, control) { ctx.fillStyle = '#007bff'; ctx.fillRect(0, 0, control.w, control.h); ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = '14px sans-serif'; ctx.fillText(control.text || 'TabBar', control.w/2, control.h/2); }"
+    },
+    {
+      "type": "switch",
+      "displayName": "Switch",
+      "icon": "/icons/switch.png",
+      "default": [
+        { "key": "x", "type": "number", "value": 50 },
+        { "key": "y", "type": "number", "value": 50 },
+        { "key": "w", "type": "number", "value": 70 },
+        { "key": "h", "type": "number", "value": 42 },
+        { "key": "text", "type": "textfield", "value": "Switch" },
+        { "key": "name", "type": "textfield", "value": "Switch" }
+      ],
+      "template": "<div class='ctrl-switch'><div class='thumb'></div></div>",
+      "draw": "function draw(ctx, control) { ctx.fillStyle = '#ccc'; ctx.fillRect(0, 0, control.w, control.h); ctx.strokeStyle = '#000'; ctx.strokeRect(0, 0, control.w, control.h); var thumbRadius = control.h * 0.4; var thumbX = control.checked === 'true' ? control.w - thumbRadius*2 : 0; var centerY = control.h/2; ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(thumbX + thumbRadius, centerY, thumbRadius, 0, Math.PI*2); ctx.fill(); ctx.stroke(); ctx.fillStyle = '#000'; ctx.font = '12px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(control.text, control.w/2, centerY); }"
+    },
+    {
+      "type": "slider",
+      "displayName": "Slider",
+      "icon": "/icons/slider.png",
+      "default": [
+        { "key": "x", "type": "number", "value": 50 },
+        { "key": "y", "type": "number", "value": 50 },
+        { "key": "w", "type": "number", "value": 150 },
+        { "key": "h", "type": "number", "value": 42 },
+        { "key": "text", "type": "textfield", "value": "Slider" },
+        { "key": "name", "type": "textfield", "value": "Slider" },
+        { "key": "value", "type": "number", "value": 50 }
+      ],
+      "template": "<input type='range' class='ctrl-slider' value='50'/>",
+      "draw": "function draw(ctx, control) { ctx.fillStyle = '#ccc'; ctx.fillRect(0, control.h/2 - 4, control.w, 8); var sliderPos = (parseFloat(control.value) || 50)/100 * control.w; ctx.fillStyle = '#007bff'; ctx.fillRect(sliderPos - 5, 0, 10, control.h); }"
+    },
+    {
+      "type": "segmentedcontrol",
+      "displayName": "SegmentedControl",
+      "icon": "/icons/segmentedcontrol.png",
+      "default": [
+        { "key": "x", "type": "number", "value": 50 },
+        { "key": "y", "type": "number", "value": 50 },
+        { "key": "w", "type": "number", "value": 200 },
+        { "key": "h", "type": "number", "value": 42 },
+        { "key": "text", "type": "textfield", "value": "Segmented" },
+        { "key": "name", "type": "textfield", "value": "SegmentedControl" }
+      ],
+      "template": "<div class='ctrl-segmented'><div>One</div><div>Two</div></div>",
+      "draw": "function draw(ctx, control) { ctx.fillStyle = '#eee'; ctx.fillRect(0, 0, control.w, control.h); ctx.strokeStyle = '#000'; ctx.strokeRect(0, 0, control.w, control.h); ctx.beginPath(); ctx.moveTo(control.w/2, 0); ctx.lineTo(control.w/2, control.h); ctx.stroke(); ctx.fillStyle = '#000'; ctx.font = '14px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('One', control.w/4, control.h/2); ctx.fillText('Two', 3*control.w/4, control.h/2); }"
+    },
+    {
+      "type": "image",
+      "displayName": "Image",
+      "icon": "/icons/image.png",
+      "default": [
+        { "key": "x", "type": "number", "value": 50 },
+        { "key": "y", "type": "number", "value": 50 },
+        { "key": "w", "type": "number", "value": 100 },
+        { "key": "h", "type": "number", "value": 100 },
+        { "key": "url", "type": "textfield", "value": "" },
+        { "key": "name", "type": "textfield", "value": "Image" }
+      ],
+      "template": "<img src='{url}' class='ctrl-image'/>",
+      "draw": "function draw(ctx, control) { var img = new Image(); img.onload = function() { ctx.drawImage(img, 0, 0, control.w, control.h); }; img.src = control.url; }"
+    },
+    {
+      "type": "radio",
+      "displayName": "Radio",
+      "icon": "/icons/radio.png",
+      "default": [
+        { "key": "x", "type": "number", "value": 50 },
+        { "key": "y", "type": "number", "value": 50 },
+        { "key": "w", "type": "number", "value": 150 },
+        { "key": "h", "type": "number", "value": 42 },
+        { "key": "name", "type": "textfield", "value": "Radio" },
+        { "key": "options", "type": "combobox", "value": ["Option 1", "Option 2", "Option 3"] },
+        { "key": "selected", "type": "textfield", "value": "" }
+      ],
+      "template": "<div class='ctrl-radio'>{options}</div>",
+      "draw": "function draw(ctx, control) { \n  // Ensure options is an array\n  var opts = Array.isArray(control.options) ? control.options : String(control.options).split(',');\n  for (var i = 0; i < opts.length; i++) {\n    var option = opts[i].trim();\n    var y = 10 + i * 20;\n    // Draw radio circle\n    ctx.strokeStyle = '#000';\n    ctx.beginPath();\n    ctx.arc(10, y, 8, 0, Math.PI * 2);\n    ctx.stroke();\n    \n    // If the selected option matches, fill the circle\n    if (control.selected === option) {\n      ctx.fillStyle = '#007bff';\n      ctx.beginPath();\n      ctx.arc(10, y, 5, 0, Math.PI * 2);\n      ctx.fill();\n    }\n    \n    // Draw the option text\n    ctx.fillStyle = '#000';\n    ctx.font = '14px sans-serif';\n    ctx.textAlign = 'left';\n    ctx.textBaseline = 'middle';\n    ctx.fillText(option, 25, y);\n  }\n}"
+    },
+    {
+      "type": "checkbox",
+      "displayName": "Checkbox",
+      "icon": "/icons/checkbox.png",
+      "default": [
+        { "key": "x", "type": "number", "value": 50 },
+        { "key": "y", "type": "number", "value": 50 },
+        { "key": "w", "type": "number", "value": 150 },
+        { "key": "h", "type": "number", "value": 60 },
+        { "key": "name", "type": "textfield", "value": "Checkbox" },
+        { "key": "options", "type": "combobox", "value": ["Option 1", "Option 2", "Option 3"] },
+        { "key": "checked", "type": "array", "value": [] }
+      ],
+      "template": "<div class='ctrl-checkbox'>{options}</div>",
+      "draw": "function draw(ctx, control) { \n  // Ensure options is an array\n  var opts = Array.isArray(control.options) ? control.options : String(control.options).split(',');\n  for (var i = 0; i < opts.length; i++) {\n    var option = opts[i].trim();\n    var y = 10 + i * 20;\n    // Draw checkbox square\n    ctx.strokeStyle = '#000';\n    ctx.strokeRect(0, y - 10, 20, 20);\n    \n    // Check if this option is checked\n    // If control.checked is an array, check membership; otherwise, if it's a boolean and true, check only the first one\n    var isChecked = Array.isArray(control.checked) ? control.checked.indexOf(option) !== -1 : (control.checked === true && i === 0);\n    if (isChecked) {\n      ctx.beginPath();\n      ctx.moveTo(0, y - 10);\n      ctx.lineTo(20, y + 10);\n      ctx.moveTo(20, y - 10);\n      ctx.lineTo(0, y + 10);\n      ctx.stroke();\n    }\n    \n    // Draw the option text\n    ctx.fillStyle = '#000';\n    ctx.font = '14px sans-serif';\n    ctx.textAlign = 'left';\n    ctx.textBaseline = 'middle';\n    ctx.fillText(option, 25, y);\n  }\n}"
+    },
+    {
+      "type": "textarea",
+      "displayName": "Textarea",
+      "icon": "/icons/textarea.png",
+      "default": [
+        { "key": "x", "type": "number", "value": 50 },
+        { "key": "y", "type": "number", "value": 50 },
+        { "key": "w", "type": "number", "value": 150 },
+        { "key": "h", "type": "number", "value": 80 },
+        { "key": "text", "type": "textarea", "value": "Multiline Text" },
+        { "key": "name", "type": "textfield", "value": "Textarea" }
+      ],
+      "template": "<textarea class='ctrl-textarea'>{text}</textarea>",
+      "draw": "function draw(ctx, control) { ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, control.w, control.h); ctx.strokeStyle = '#000'; ctx.strokeRect(0, 0, control.w, control.h); ctx.fillStyle = '#000'; ctx.font = '14px sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'top'; var lines = control.text.split('\\n'); for(var i=0; i<lines.length; i++){ ctx.fillText(lines[i], 4, 4 + i*16); } }"
+    },
+    {
+      "type": "map",
+      "displayName": "Map",
+      "icon": "/icons/map.png",
+      "default": [
+        { "key": "x", "type": "number", "value": 50 },
+        { "key": "y", "type": "number", "value": 50 },
+        { "key": "w", "type": "number", "value": 300 },
+        { "key": "h", "type": "number", "value": 200 },
+        { "key": "name", "type": "textfield", "value": "Map" }
+      ],
+      "template": "<div class='ctrl-map'></div>",
+      "draw": "function draw(ctx, control) { ctx.fillStyle = '#ddd'; ctx.fillRect(0, 0, control.w, control.h); ctx.strokeStyle = '#000'; ctx.strokeRect(0, 0, control.w, control.h); ctx.fillStyle = '#000'; ctx.font = '14px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('Map', control.w/2, control.h/2); }"
+    },
+    {
+      "type": "listview",
+      "displayName": "ListView",
+      "icon": "/icons/listview.png",
+      "default": [
+        { "key": "x", "type": "number", "value": 50 },
+        { "key": "y", "type": "number", "value": 50 },
+        { "key": "w", "type": "number", "value": 150 },
+        { "key": "h", "type": "number", "value": 120 },
+        { "key": "name", "type": "textfield", "value": "ListView" },
+        { "key": "items", "type": "combobox", "value": ["Item 1", "Item 2", "Item 3"] }
+      ],
+      "template": "<ul class='ctrl-listview'>{items}</ul>",
+      "draw": "function draw(ctx, control) { ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, control.w, control.h); ctx.strokeStyle = '#000'; ctx.strokeRect(0, 0, control.w, control.h); ctx.fillStyle = '#000'; ctx.font = '14px sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'top'; var items = control.items || []; for(var i=0; i<items.length; i++){ ctx.fillText(items[i], 4, 4 + i*18); } }"
+    },
+    {
+      "type": "progressbar",
+      "displayName": "ProgressBar",
+      "icon": "/icons/progressbar.png",
+      "default": [
+        { "key": "x", "type": "number", "value": 50 },
+        { "key": "y", "type": "number", "value": 50 },
+        { "key": "w", "type": "number", "value": 200 },
+        { "key": "h", "type": "number", "value": 42 },
+        { "key": "color", "type": "color", "value": "#ffffff" },
+        { "key": "name", "type": "textfield", "value": "ProgressBar" },
+        { "key": "progress", "type": "number", "value": 50 }
+      ],
+      "template": "<div class='ctrl-progressbar'><div class='progress-fill' style='width:{progress}%;'></div></div>",
+      "draw": "function draw(ctx, control) { ctx.fillStyle = '#ccc'; ctx.fillRect(0, 0, control.w, control.h); var prog = parseFloat(control.progress) || 50; var progWidth = control.w * prog/100; ctx.fillStyle = control.color || '#007bff'; ctx.fillRect(0, 0, progWidth, control.h); ctx.strokeStyle = '#000'; ctx.strokeRect(0, 0, control.w, control.h); }"
+    },
+    {
+      "type": "radialprogress",
+      "displayName": "RadialProgress",
+      "icon": "/icons/radialprogressbar.png",
+      "default": [
+        { "key": "x", "type": "number", "value": 50 },
+        { "key": "y", "type": "number", "value": 50 },
+        { "key": "w", "type": "number", "value": 100 },
+        { "key": "h", "type": "number", "value": 100 },
+        { "key": "name", "type": "textfield", "value": "RadialProgress" },
+        { "key": "progress", "type": "number", "value": 50 }
+      ],
+      "template": "<svg viewBox='0 0 100 100' class='ctrl-radialprogress'><circle cx='50' cy='50' r='45' stroke='#eee' stroke-width='10' fill='none'/><circle cx='50' cy='50' r='45' stroke='#007bff' stroke-width='10' fill='none' stroke-dasharray='282.743' stroke-dashoffset='{offset}'/></svg>",
+      "draw": "function draw(ctx, control) { var prog = parseFloat(control.progress) || 50; var centerX = control.w/2, centerY = control.h/2; var radius = Math.min(control.w, control.h)/2 - 5; ctx.lineWidth = 10; ctx.strokeStyle = '#eee'; ctx.beginPath(); ctx.arc(centerX, centerY, radius, 0, Math.PI*2); ctx.stroke(); var angle = (Math.PI*2) * (prog/100) - Math.PI/2; ctx.strokeStyle = '#007bff'; ctx.beginPath(); ctx.arc(centerX, centerY, radius, -Math.PI/2, angle); ctx.stroke(); }"
+    },
+    {
+      "type": "combobox",
+      "displayName": "ComboBox",
+      "icon": "/icons/combobox.png",
+      "default": [
+        { "key": "x", "type": "number", "value": 50 },
+        { "key": "y", "type": "number", "value": 50 },
+        { "key": "w", "type": "number", "value": 150 },
+        { "key": "h", "type": "number", "value": 42 },
+        { "key": "name", "type": "textfield", "value": "ComboBox" },
+        { "key": "options", "type": "combobox", "value": ["Option 1", "Option 2", "Option 3"] }
+      ],
+      "template": "<select class='ctrl-combobox'>{options}</select>",
+      "draw": "function draw(ctx, control) { ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, control.w, control.h); ctx.strokeStyle = '#000'; ctx.strokeRect(0, 0, control.w, control.h); ctx.fillStyle = '#000'; ctx.font = '14px sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; var text = control.options ? control.options[0] : ''; ctx.fillText(text, 4, control.h/2); ctx.fillStyle = '#000'; ctx.beginPath(); ctx.moveTo(control.w - 20, control.h/2 - 5); ctx.lineTo(control.w - 10, control.h/2 - 5); ctx.lineTo(control.w - 15, control.h/2 + 5); ctx.closePath(); ctx.fill(); }"
+    },
+    {
+      "type": "mediaplayer",
+      "displayName": "MediaPlayer",
+      "icon": "/icons/mediaplayer.png",
+      "default": [
+        { "key": "x", "type": "number", "value": 50 },
+        { "key": "y", "type": "number", "value": 50 },
+        { "key": "w", "type": "number", "value": 300 },
+        { "key": "h", "type": "number", "value": 200 },
+        { "key": "name", "type": "textfield", "value": "MediaPlayer" },
+        { "key": "src", "type": "textfield", "value": "https://www.w3schools.com/html/mov_bbb.mp4" }
+      ],
+      "template": "<video class='ctrl-mediaplayer' controls style='width:100%; height:100%;'><source src='{src}' type='video/mp4'></video>",
+      "draw": "function draw(ctx, control) { ctx.fillStyle = '#000'; ctx.fillRect(0, 0, control.w, control.h); ctx.fillStyle = '#fff'; ctx.font = '16px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('Media Player', control.w/2, control.h/2); }"
+    },
+    {
+      "type": "youtube",
+      "displayName": "YouTubePlayer",
+      "icon": "/icons/youtube.png",
+      "default": [
+        { "key": "x", "type": "number", "value": 50 },
+        { "key": "y", "type": "number", "value": 50 },
+        { "key": "w", "type": "number", "value": 300 },
+        { "key": "h", "type": "number", "value": 200 },
+        { "key": "name", "type": "textfield", "value": "YouTube" },
+        { "key": "src", "type": "textfield", "value": "https://www.youtube.com/embed/dQw4w9WgXcQ" }
+      ],
+      "template": "<iframe class='ctrl-youtube' width='100%' height='100%' src='{src}' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe>",
+      "draw": "function draw(ctx, control) { ctx.fillStyle = '#000'; ctx.fillRect(0, 0, control.w, control.h); ctx.fillStyle = '#fff'; ctx.font = '16px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('YouTube', control.w/2, control.h/2); }"
+    },
+    {
+      "type": "link",
+      "displayName": "Link",
+      "icon": "/icons/link.png",
+      "default": [
+        { "key": "x", "type": "number", "value": 50 },
+        { "key": "y", "type": "number", "value": 50 },
+        { "key": "w", "type": "number", "value": 100 },
+        { "key": "h", "type": "number", "value": 42 },
+        { "key": "text", "type": "textfield", "value": "Link" },
+        { "key": "name", "type": "textfield", "value": "Link" },
+        { "key": "href", "type": "textfield", "value": "#" }
+      ],
+      "template": "<a href='{href}' class='ctrl-link'>{text}</a>",
+      "draw": "function draw(ctx, control) { ctx.fillStyle = '#007bff'; ctx.font = '14px sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText(control.text, 0, control.h/2); var textWidth = ctx.measureText(control.text).width; ctx.strokeStyle = '#007bff'; ctx.beginPath(); ctx.moveTo(0, control.h/2 + 2); ctx.lineTo(textWidth, control.h/2 + 2); ctx.stroke(); }"
+    },
+    {
+      "type": "timer",
+      "displayName": "Timer",
+      "icon": "/icons/timer.png",
+      "default": [
+        { "key": "x", "type": "number", "value": 50 },
+        { "key": "y", "type": "number", "value": 50 },
+        { "key": "text", "type": "textfield", "value": "Timer" }
+      ],
+      "template": "<div class='ctrl-timer'>Timer: {text}</div>",
+      "draw": "function draw(ctx, control) { ctx.fillStyle = '#000'; ctx.font = '14px sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText('Timer: ' + control.text, 0, 10); }"
+    }
+  ]
+}

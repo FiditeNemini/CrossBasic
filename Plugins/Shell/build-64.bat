@@ -1,0 +1,1 @@
+g++ -s -shared -fPIC -m64 -O3 -o Shell.dll Shell.cpp -pthread

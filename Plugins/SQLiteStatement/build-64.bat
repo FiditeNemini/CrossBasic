@@ -1,0 +1,1 @@
+g++ -shared -o SQLiteStatement.dll SQLiteStatement.cpp -lsqlite3 -Wl,--unresolved-symbols=ignore-all -L. -lSQLiteDatabase

@@ -1,0 +1,1 @@
+Speak("Hello world! This is a CrossBasic speech demo.")

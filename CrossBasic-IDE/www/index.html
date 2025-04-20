@@ -1,0 +1,1642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+  <meta http-equiv="Pragma"        content="no-cache">
+  <meta http-equiv="Expires"       content="0">
+
+  <meta charset="UTF-8">
+  <!-- Added favicon for browsers and webapps -->
+  <link rel="icon" href="/icons/icon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Crossbasic IDE 2025 Release 1 - Beta</title>
+  <!-- Include FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <!-- Include interact.js -->
+  <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+  <!-- Include Ace Editor -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.39.1/ace.min.js" integrity="sha512-WgH9t1qfGMsgkGm6j8zrhj8UHqry1q+guPAJPGqIeWAVjs9/JsSUwAzdOLGvckuF+cbGie2XUYEKhCNybk5dTg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&display=swap" rel="stylesheet">
+  
+  <style>
+    /* Dark mode scrollbars */
+    ::-webkit-scrollbar { width: 8px; height: 8px; background-color: #333; }
+    ::-webkit-scrollbar-track { background-color: #2b2b2b; }
+    ::-webkit-scrollbar-thumb { background-color: #555; border-radius: 4px; border: 2px solid #2b2b2b; }
+    ::-webkit-scrollbar-thumb:hover { background-color: #777; }
+    * { scrollbar-width: thin; scrollbar-color: #555 #2b2b2b; }
+
+    /* Basic reset and layout */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font: 14px sans-serif; height: 100vh; display: flex; flex-direction: column; }
+
+    /* Toolbar with three sections */
+    #toolbar {
+      background: #030303;
+      color: #fff;
+      padding: 8px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+    }
+    #leftButtons, #centerButtons, #rightButtons {
+      flex: 1;
+      display: flex;
+      align-items: center;
+    }
+    #leftButtons { justify-content: flex-start; }
+    #centerButtons { justify-content: center; }
+    #rightButtons { justify-content: flex-end; }
+    #toolbar button { padding: 6px 12px; cursor: pointer; background: #444; color: #fff; border: none; margin-right: 8px; }
+    #toolbar button:hover { background: #555; }
+
+    /* Main container with vertical splitters */
+    #container { flex: 1; display: flex; overflow: hidden; }
+
+    /* Explorer Panel */
+    #explorer-panel {
+      width: 320px;
+      background: #333;
+      border-right: 1px solid #444;
+      padding: 8px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      color: #fff;
+    }
+    #explorerHeader { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    #explorerHeader h3 { margin: 0; }
+    #addResourceBtn { background: none; border: none; color: #fff; cursor: pointer; font-size: 18px; }
+    #addResourceBtn:hover { color: #0f0; }
+    #resourceMenu {
+      display: none;
+      position: absolute;
+      background: #444;
+      border: 1px solid #555;
+      padding: 4px 0;
+      z-index: 200;
+      min-width: 120px;
+    }
+    #resourceMenu div { padding: 6px 12px; cursor: pointer; color: #fff; font-size: 14px; }
+    #resourceMenu div:hover { background: #555; }
+
+    #explorerTree {
+      flex: 1;
+      background: #222;
+      border: 1px solid #444;
+      padding: 4px;
+      color: #fff;
+      overflow-y: auto;
+    }
+    #explorerList { list-style: none; padding-left: 10px; }
+    #explorerList ul { list-style: none; margin-left: 20px; padding-left: 0; }
+    #explorerList li .tree-item-header {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px;
+      cursor: pointer;
+      border-radius: 3px;
+    }
+    #explorerList li.selected-tree { background-color: #666; }
+    #explorerList li img { width: 16px; height: 16px; }
+
+    #projContextMenu {
+      display: none;
+      position: absolute;
+      background: #444;
+      border: 1px solid #555;
+      padding: 4px 0;
+      z-index: 300;
+      min-width: 140px;
+      color: #fff;
+    }
+    #projContextMenu div { padding: 6px 12px; cursor: pointer; font-size: 14px; }
+    #projContextMenu div:hover { background: #555; }
+
+    #assetModal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8);
+      z-index: 500;
+      justify-content: center;
+      align-items: center;
+    }
+    #assetModalContent { position: relative; max-width: 90%; max-height: 90%; }
+    #assetModalContent img { max-width: 100%; max-height: 100%; display: block; }
+    #assetModalClose {
+      position: absolute; top: -10px; right: -10px;
+      background: #fff; color: #000; width: 24px; height: 24px;
+      border-radius: 50%; text-align: center; line-height: 24px;
+      cursor: pointer; font-weight: bold;
+    }
+
+    #vSplitterLeft { width: 5px; background: #444; cursor: col-resize; }
+
+    /* Canvas Container – Designer / Code Editor */
+    #canvas-container {
+      flex: 1;
+      position: relative;
+      background: #222;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    #canvas {
+      position: relative;
+      width: 375px; height: 667px;
+      background: #fff;
+      border: 1px solid #ccc;
+      touch-action: none;
+      transform-origin: center center;
+      display: none;
+    }
+    #codeHeader {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 24px;
+      background: #111;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      font-size: 14px;
+      z-index: 1010;
+    }
+    #editor {
+      position: absolute;
+      top: 24px; left: 0; right: 0; bottom: 0;
+      display: none;
+    }
+
+    /* Zoom Control – hidden by default */
+    #zoomControl {
+      position: absolute; bottom: 10px; right: 10px;
+      background: #444; border: 1px solid #555;
+      border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      z-index: 1000; display: none;
+      align-items: center; padding: 2px;
+    }
+    #zoomControl input {
+      width: 50px; text-align: center;
+      margin-right: 4px; margin-left: 6px;
+      background: #333; color: #fff; border: 1px solid #555;
+    }
+    #zoomControl button {
+      border: none; background: transparent;
+      padding: 6px 10px; cursor: pointer;
+      color: #fff; font-size: 16px;
+    }
+
+    /* Tab Panel */
+    #tabPanel {
+      width: 281px;
+      background: #333;
+      border-left: 1px solid #444;
+      display: flex;
+      flex-direction: column;
+      color: #fff;
+    }
+    #tabHeaders {
+      display: flex;
+      border-bottom: 1px solid #444;
+    }
+    #tabHeaders button {
+      flex: 1; padding: 8px;
+      background: #444; border: none;
+      cursor: pointer; font-size: 14px;
+      color: #fff;
+    }
+    #tabHeaders button.active {
+      background: #222; border-bottom: 2px solid #007bff;
+    }
+    #tabHeaders button:disabled {
+      opacity: 0.4; cursor: default;
+    }
+    #tabContents {
+      flex: 1; overflow-y: auto; background: #333;
+    }
+    .tabContent {
+      display: none;
+      height: 100%;
+      padding: 8px;
+    }
+    .tabContent.active { display: block; }
+
+    /* Toolbox */
+    #toolbox {
+      display: flex; flex-wrap: wrap; gap: 8px;
+    }
+    .toolbox-item {
+      width: 60px; height: 60px;
+      border: 1px solid #555;
+      border-radius: 4px;
+      background: #444;
+      display: flex; flex-direction: column;
+      justify-content: center; align-items: center;
+      cursor: pointer; user-select: none;
+      position: relative; color: #fff;
+    }
+    .toolbox-item:hover { background: #555; }
+    .toolbox-item .control-name {
+      position: absolute;
+      bottom: 2px; left: 0; right: 0;
+      text-align: center; font-size: 10px;
+      background: rgba(0,0,0,0.7);
+      color: #fff;
+      border-radius: 2px;
+      display: none;
+    }
+    .toolbox-item:hover .control-name { display: block; }
+
+    /* Properties Panel */
+    #propPanel {
+      padding: 8px; overflow-y: auto;
+      height: 50%; background: #444;
+      color: #fff;
+    }
+    #propPanel h3 { margin-bottom: 8px; color: #fff; }
+    #propPanel label {
+      display: block;
+      margin-top: 6px;
+      margin-bottom: 4px;
+      font-size: 13px;
+      color: #fff;
+    }
+    #propPanel input,
+    #propPanel textarea,
+    #propPanel select {
+      width: 100%;
+      padding: 4px;
+      font-size: 13px;
+      margin-bottom: 4px;
+      margin-top: 4px;
+      background: #333;
+      color: #fff;
+      border: 1px solid #555;
+    }
+    #splitter {
+      height: 5px;
+      background: #141414;
+      cursor: row-resize;
+      margin-top: 8px;
+      margin-bottom: 8px;
+    }
+
+    /* View Controls Pane */
+    #treeView {
+      flex: 1; overflow-y: auto;
+      padding: 8px; background: #444;
+      color: #fff; display: none;
+    }
+    #treeView h3 { margin-bottom: 8px; color: #fff; }
+    #treeList li { margin-bottom: 4px; }
+
+    /* Designer Controls */
+    .ui-control {
+      position: absolute; border: none; touch-action: none;
+    }
+    .ui-control.selected { outline: 2px dashed #007bff; }
+
+    .control-draw-canvas { display: block; }
+
+    /* Resize Handles */
+    .resize-handle {
+      position: absolute; width: 8px; height: 8px;
+      background: #007bff; border: 1px solid #fff;
+      border-radius: 50%; pointer-events: auto;
+      touch-action: none; z-index: 10;
+    }
+    .resize-handle.n  { top: -4px; left: 50%; transform: translateX(-50%); cursor: ns-resize; }
+    .resize-handle.s  { bottom: -4px; left: 50%; transform: translateX(-50%); cursor: ns-resize; }
+    .resize-handle.e  { right: -4px; top: 50%; transform: translateY(-50%); cursor: ew-resize; }
+    .resize-handle.w  { left: -4px; top: 50%; transform: translateY(-50%); cursor: ew-resize; }
+    .resize-handle.ne { top: -4px; right: -4px; cursor: nesw-resize; }
+    .resize-handle.nw { top: -4px; left: -4px; cursor: nwse-resize; }
+    .resize-handle.se { bottom: -4px; right: -4px; cursor: nwse-resize; }
+    .resize-handle.sw { bottom: -4px; left: -4px; cursor: nesw-resize; }
+
+    #contextMenu {
+      position: absolute; background: #444; border: 1px solid #555;
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+      display: none; z-index: 100; color: #fff;
+    }
+    #contextMenu div { padding: 8px 12px; cursor: pointer; font-size: 14px; }
+    #contextMenu div:hover { background: #555; }
+
+    #statusBar {
+      height: 24px; background: #030303; color: #fff;
+      display: flex; align-items: center;
+      padding: 0 8px; font-size: 13px;
+      justify-content: space-between;
+    }
+    #statusRight { text-align: right; }
+
+    /* Custom Switch */
+    .switch {
+      position: relative; display: inline-block;
+      width: 40px; height: 20px;
+    }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute; cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #ccc; transition: .4s;
+      border-radius: 20px;
+    }
+    .slider:before {
+      position: absolute; content: "";
+      height: 16px; width: 16px;
+      left: 2px; bottom: 2px;
+      background-color: white; transition: .4s;
+      border-radius: 50%;
+    }
+    .switch input:checked + .slider { background-color: #007bff; }
+    .switch input:checked + .slider:before { transform: translateX(20px); }
+  </style>
+</head>
+<body>
+  <!-- Toolbar -->
+  <div id="toolbar">
+    <div id="leftButtons">
+      <button style="font-size: 24px;" id="saveBtn" title="Save"><i class="fas fa-save"></i></button>
+      <button style="font-size: 24px;" id="loadBtn" title="Load"><i class="fas fa-folder-open"></i></button>
+    </div>
+    <div id="centerButtons">
+      <button style="font-size: 24px;" id="runBtn" title="Run"><i class="fas fa-play"></i></button>
+      <button style="font-size: 24px;" id="buildBtn" title="Build"><i class="fas fa-hammer"></i></button>
+    </div>
+    <div id="rightButtons"></div>
+    <input type="file" id="fileInput" style="display:none" accept="application/json">
+  </div>
+
+  <!-- Main Container -->
+  <div id="container">
+    <div id="explorer-panel">
+      <div id="explorerHeader">
+        <h3>Project Explorer</h3>
+        <button id="addResourceBtn" title="Add Resource"><i class="fas fa-plus"></i></button>
+      </div>
+      <div id="explorerTree">
+        <ul id="explorerList"></ul>
+      </div>
+    </div>
+    <div id="vSplitterLeft"></div>
+    <div id="canvas-container">
+      <div id="canvas"></div>
+      <div id="codeHeader">CrossBasic IDE 2025 Release 1 - Beta</div>
+      <div id="editor"></div>
+      <div id="zoomControl">
+        <input type="text" id="zoomPercent" value="100%" />
+        <button id="zoomOut">–</button>
+        <button id="zoomIn">+</button>
+      </div>
+    </div>
+    <div id="vSplitterRight"></div>
+    <div id="tabPanel">
+      <div id="tabHeaders">
+        <button data-tab="toolboxTab">Toolbox</button>
+        <button data-tab="propTab" class="active">Properties</button>
+      </div>
+      <div id="tabContents">
+        <div id="toolboxTab" class="tabContent">
+          <div id="toolbox" class="control-grid"></div>
+        </div>
+        <div id="propTab" class="tabContent active">
+          <div id="propPanel"></div>
+          <div id="splitter"></div>
+          <div id="treeView">
+            <h3>View Controls</h3>
+            <ul id="treeList"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hidden Resource Menu -->
+  <div id="resourceMenu">
+    <div data-type="view">View</div>
+    <div data-type="module">Module</div>
+    <div data-type="class">Class</div>
+    <div data-type="asset">Asset</div>
+  </div>
+
+  <!-- Hidden file input for Assets -->
+  <input type="file" id="assetFileInput" style="display:none" multiple>
+
+  <!-- Project Explorer Context Menu -->
+  <div id="projContextMenu"></div>
+
+  <!-- Modal for Viewing Asset Images -->
+  <div id="assetModal">
+    <div id="assetModalContent">
+      <span id="assetModalClose">&times;</span>
+      <img id="assetModalImage" src="" alt="Asset">
+    </div>
+  </div>
+
+  <!-- Status Bar -->
+  <div id="statusBar">
+    <div>Idle...</div>
+    <div id="statusRight">Crossbasic IDE 2025 Release 1 - Beta</div>
+  </div>
+
+  <!-- Context Menu for Canvas Controls -->
+  <div id="contextMenu">
+    <div id="cmRemove">Remove</div>
+    <div id="cmDuplicate">Duplicate</div>
+  </div>
+
+  <script>
+    /********** Globals & Helpers **********/
+    let controlCounter = 0,
+        selectedControl = null,
+        currentViewNode = null,
+        currentCodeNode = null,
+        zoomLevel = 1;
+    const canvas     = document.getElementById('canvas'),
+          toolboxBtn = document.querySelector('button[data-tab="toolboxTab"]'),
+          propBtn    = document.querySelector('button[data-tab="propTab"]'),
+          treeView   = document.getElementById('treeView'),
+          zoomCtrl   = document.getElementById('zoomControl');
+    let defaultControls = {};
+    let projectTree = { name: "Application", type: "application", children: [] };
+    const groupOrder = ["Constants","Methods","Properties","Enumerations"];
+
+    function rgbToHex(rgb) {
+      const nums = rgb.match(/\d+/g);
+      if (!nums || nums.length < 3) return "#000000";
+      const [r,g,b] = nums.map(n=>parseInt(n).toString(16).padStart(2,"0"));
+      return `#${r}${g}${b}`;
+    }
+
+    function convertDefaults(arr) {
+      const o = {};
+      arr.forEach(p => o[p.key] = p.value);
+      return o;
+    }
+    function getDefaultPropTypes(arr) {
+      const o = {};
+      arr.forEach(p => o[p.key] = p.type);
+      return o;
+    }
+
+    function getInputElementForType(propType, value, key) {
+      if (key === "options") {
+        const ta = document.createElement("textarea");
+        ta.value = Array.isArray(value) ? value.join("\n") : value;
+        return ta;
+      }
+      if (propType === "boolean") {
+        const lbl = document.createElement("label"), inp = document.createElement("input"), sld = document.createElement("span");
+        lbl.className = "switch"; inp.type = "checkbox"; inp.checked = (value===true||value==="true");
+        sld.className = "slider"; lbl.append(inp,sld); return lbl;
+      }
+      switch(propType) {
+        case "number":
+          const n = document.createElement("input");
+          n.type="number"; n.value=value; return n;
+        case "color":
+          const c = document.createElement("input");
+          c.type="color";
+          let col = value||"#ffffff";
+          if(typeof col==="string"&&col.startsWith("rgb")) col = rgbToHex(col);
+          c.value=col;
+          return c;
+        case "textarea":
+          const t = document.createElement("textarea");
+          t.value=value; return t;
+        case "combobox":
+          if (Array.isArray(value)) {
+            const sel = document.createElement("select");
+            value.forEach(o=>{ const opt = document.createElement("option"); opt.value=o; opt.textContent=o; sel.append(opt); });
+            return sel;
+          } else {
+            const i = document.createElement("input");
+            i.type="text"; i.value=value; return i;
+          }
+        default:
+          const txt = document.createElement("input");
+          txt.type="text"; txt.value=value;
+          return txt;
+      }
+    }
+
+    /********** Ace Editor Setup **********/
+    var codeEditor = ace.edit("editor");
+    codeEditor.setTheme("ace/theme/merbivore_soft");
+    codeEditor.session.setMode("ace/mode/vbscript");
+    codeEditor.setOptions({
+      enableBasicAutocompletion: true,
+      enableSnippets: true,
+      enableLiveAutocompletion: true,
+      showPrintMargin: false,
+      fontSize: "12pt",
+      fontFamily: "Fira Code"
+    });
+    
+
+    function updateEditorSize() {
+      if (editor.style.display!=="none") {
+        const r = document.getElementById('canvas-container').getBoundingClientRect();
+        codeEditor.container.style.width  = r.width+"px";
+        codeEditor.container.style.height = (r.height-24)+"px";
+        codeEditor.resize();
+      }
+    }
+    window.addEventListener("resize", updateEditorSize);
+
+    /********** Save & Utilities **********/
+    function saveCurrentView() {
+      if(!currentViewNode) return;
+      currentViewNode.designer = {
+        name: currentViewNode.name,
+        width: parseInt(canvas.style.width),
+        height: parseInt(canvas.style.height),
+        backgroundColor: canvas.style.backgroundColor
+      };
+      currentViewNode.controls = [];
+      canvas.querySelectorAll('.ui-control').forEach(c=>{
+        let dyn={};
+        Array.from(c.attributes).forEach(a=>{ if(a.name.startsWith("data-")) dyn[a.name.slice(5)] = a.value; });
+        currentViewNode.controls.push({
+          id: c.getAttribute("data-id"),
+          left: c.style.left,
+          top:  c.style.top,
+          width:c.style.width,
+          height:c.style.height,
+          dynamic: dyn
+        });
+      });
+    }
+
+    function updateProperty(key,value,context) {
+      if(context==="control" && selectedControl) {
+        if(["x","y","w","h"].includes(key)) {
+          if(key==="x") selectedControl.style.left = value+"px";
+          if(key==="y") selectedControl.style.top  = value+"px";
+          if(key==="w") selectedControl.style.width= value+"px";
+          if(key==="h") selectedControl.style.height=value+"px";
+        } else {
+          selectedControl.setAttribute("data-"+key, value);
+        }
+        const def = defaultControls[selectedControl.getAttribute("data-type")];
+        if(def?.drawFunc) {
+          const p = getControlProperties(selectedControl),
+                cc = selectedControl.querySelector('.control-draw-canvas'),
+                ctx=cc.getContext('2d');
+          cc.width=p.w; cc.height=p.h;
+          ctx.clearRect(0,0,cc.width,cc.height);
+          try{ def.drawFunc(ctx,p); }catch{}
+        }
+        saveCurrentView();
+      }
+      else if(context==="designer" && currentViewNode) {
+        if(key==="width")  { canvas.style.width=value+"px";  currentViewNode.designer.width=parseInt(value); }
+        if(key==="height") { canvas.style.height=value+"px"; currentViewNode.designer.height=parseInt(value); }
+        if(key==="backgroundColor") { canvas.style.backgroundColor=value; currentViewNode.designer.backgroundColor=value; }
+        if(key==="name") { currentViewNode.name=value; currentViewNode.designer.name=value; }
+        saveCurrentView();
+      }
+      else if(context==="code" && currentCodeNode) {
+        currentCodeNode[key] = value;
+        if(["constantName","methodName","propertyName","enumName","name"].includes(key)) {
+          currentCodeNode.name = value;
+        }
+      }
+      renderProjectTree();
+      renderPropertiesPanel();
+      updateCodeHeader();
+    }
+
+    function updateTabsAndZoom() {
+      if(currentViewNode) {
+        toolboxBtn.disabled=false;
+        zoomCtrl.style.display='flex';
+        treeView.style.display='block';
+      } else {
+        toolboxBtn.disabled=true;
+        zoomCtrl.style.display='none';
+        treeView.style.display='none';
+      }
+      propBtn.click();
+    }
+
+    function getControlProperties(c) {
+      const r={ x:parseInt(c.style.left), y:parseInt(c.style.top), w:parseInt(c.style.width), h:parseInt(c.style.height) };
+      Array.from(c.attributes).forEach(a=>{
+        if(a.name.startsWith("data-")) {
+          let k=a.name.slice(5), v=a.value;
+          const def = defaultControls[c.getAttribute("data-type")]?.default.find(p=>p.key===k);
+          if(def?.type==="number") v=parseFloat(v);
+          if(def?.type==="boolean") v=(v==="true");
+          if(def?.type==="combobox") {
+            try{ v=JSON.parse(v); }catch{ v=v.split("\n").map(s=>s.trim()).filter(s=>s); }
+          }
+          r[k]=v;
+        }
+      });
+      return r;
+    }
+
+    function updateControlDraw(c) {
+      const def = defaultControls[c.getAttribute("data-type")];
+      if(!def?.drawFunc) return;
+      const p = getControlProperties(c),
+            cc = c.querySelector('.control-draw-canvas'),
+            ctx=cc.getContext('2d');
+      cc.width=p.w; cc.height=p.h;
+      ctx.clearRect(0,0,cc.width,cc.height);
+      try{ def.drawFunc(ctx,p); }catch{}
+    }
+
+    function updateCodeHeader() {
+      const hdr = document.getElementById('codeHeader');
+      if(!currentCodeNode||!currentCodeNode.codeType){
+        hdr.textContent = currentCodeNode?.name||"CrossBasic UI Designer";
+        return;
+      }
+      const ct = currentCodeNode.codeType,
+            sc = currentCodeNode.scope||"Public";
+      let txt="";
+      if(ct==="Constants"){
+        const nm=currentCodeNode.name||"",
+              dv=currentCodeNode.defaultValue||"",
+              tp=currentCodeNode.typeProp||"";
+        const dvText=(tp.toLowerCase()==="string")?`"${dv}"`:dv;
+        txt = `${sc} Const ${nm} As ${tp}`;
+        if(dv!=="") txt += ` = ${dvText}`;
+      }
+      else if(ct==="Methods"){
+        const nm=currentCodeNode.name||"",
+              pm=currentCodeNode.parameters||"",
+              rt=currentCodeNode.returnType||"";
+        const kw=rt?"Function":"Sub";
+        txt = `${sc} ${kw} ${nm}(${pm})`;
+        if(rt) txt += ` As ${rt}`;
+      }
+      else if(ct==="Properties"){
+        const nm=currentCodeNode.name||"",
+              tp=currentCodeNode.propertyType||"",
+              dv=currentCodeNode.defaultVal||"";
+        const dvText=(tp.toLowerCase()==="string")?`"${dv}"`:dv;
+        txt = `${sc} Var ${nm} As ${tp}`;
+        if(dv!=="") txt += ` = ${dvText}`;
+      }
+      else if(ct==="Enumerations"){
+        txt = `${sc} ${currentCodeNode.name||""}[]`;
+      }
+      hdr.textContent = txt;
+    }
+
+    /********** Zoom Controls **********/
+    function applyZoom(){ canvas.style.transform=`scale(${zoomLevel})`; }
+    function updateZoomDisplay(){ document.getElementById('zoomPercent').value=Math.round(zoomLevel*100)+"%"; }
+    document.getElementById('zoomIn').addEventListener('click',()=>{
+      if(zoomLevel<2) zoomLevel+=0.1;
+      applyZoom(); updateZoomDisplay();
+    });
+    document.getElementById('zoomOut').addEventListener('click',()=>{
+      if(zoomLevel>0.5) zoomLevel-=0.1;
+      applyZoom(); updateZoomDisplay();
+    });
+    const zp = document.getElementById('zoomPercent');
+    zp.addEventListener('blur',()=>{
+      const n=parseFloat(zp.value.replace("%",""));
+      if(!isNaN(n)){ zoomLevel=n/100; applyZoom(); }
+      updateZoomDisplay();
+    });
+    zp.addEventListener('keydown',e=>{ if(e.key==="Enter") zp.blur(); });
+
+    /********** Render Project Tree **********/
+    function renderProjectTree() {
+      const ex = document.getElementById('explorerList');
+      ex.innerHTML = "";
+      function walk(node, parentGroup) {
+        const li = document.createElement('li'),
+              hd = document.createElement('div');
+        hd.className = "tree-item-header";
+
+        // toggle for collapsible
+        if(node.children?.length && ["module","class","asset","group","view"].includes(node.type)) {
+          const tog = document.createElement('span');
+          tog.textContent = node.collapsed ? "►" : "▼";
+          tog.style.cursor="pointer";
+          tog.style.userSelect="none";
+          tog.style.fontSize="12px";
+          tog.addEventListener('click', e=>{
+            e.stopPropagation(); node.collapsed=!node.collapsed; renderProjectTree();
+          });
+          hd.append(tog);
+        }
+
+        const img = document.createElement('img');
+        switch(node.type){
+          case "application": img.src="/icons/App48.png"; break;
+          case "view":        img.src="/icons/View48.png"; break;
+          case "module":      img.src="/icons/Module48.png"; break;
+          case "class":       img.src="/icons/Class48.png"; break;
+          case "asset":       img.src="/icons/Folder48.png"; break;
+          case "file":        img.src="/icons/Asset48.png"; break;
+          case "group":
+            if(node.groupName==="Constants")    img.src="/icons/Constant48.png";
+            else if(node.groupName==="Methods") img.src="/icons/Method48.png";
+            else if(node.groupName==="Properties") img.src="/icons/Property48.png";
+            else if(node.groupName==="Enumerations") img.src="/icons/Enum48.png";
+            break;
+          case "code":
+            if(parentGroup==="Constants")    img.src="/icons/Constant48.png";
+            else if(parentGroup==="Methods") img.src="/icons/Method48.png";
+            else if(parentGroup==="Properties") img.src="/icons/Property48.png";
+            else if(parentGroup==="Enumerations") img.src="/icons/Enum48.png";
+            else img.src="/icons/Asset48.png";
+            break;
+        }
+        img.style.width = img.style.height = "16px";
+        hd.append(img);
+
+        const sp = document.createElement('span');
+        sp.textContent = node.name;
+        if(node.type==="code") {
+          sp.style.color = (node.scope==="Private" ? "red" : "#fff");
+        }
+        hd.append(sp);
+
+        li.append(hd);
+
+        li.addEventListener("click", e=>{
+          e.stopPropagation();
+          document.querySelectorAll('#explorerList li').forEach(x=>x.classList.remove('selected-tree'));
+          li.classList.add('selected-tree');
+          if(node.type==="view") loadView(node);
+          else loadCodeEditor(node);
+        });
+        li.addEventListener("contextmenu", e=>{
+          e.preventDefault(); e.stopPropagation();
+          showProjContextMenu(e,node,li);
+        });
+
+        if((node.type==="view"&&currentViewNode===node)||
+           ((["module","class","code"].includes(node.type))&&currentCodeNode===node)) {
+          li.classList.add('selected-tree');
+        }
+
+        if(node.children?.length && !node.collapsed) {
+          const ul = document.createElement('ul'),
+                ng = (node.type==="group"?node.groupName:parentGroup);
+          node.children.forEach(c=>ul.appendChild(walk(c,ng)));
+          li.append(ul);
+        }
+
+        return li;
+      }
+      ex.append(walk(projectTree,null));
+      updateTabsAndZoom();
+    }
+
+    /********** Project Context Menu **********/
+    function showProjContextMenu(e,node,li) {
+      const m = document.getElementById('projContextMenu');
+      m.innerHTML = "";
+      if(node.type==="file"){
+        const va = document.createElement('div');
+        va.textContent="View Asset";
+        va.addEventListener('click',ev=>{
+          ev.stopPropagation(); hideProjContextMenu();
+          const ln=node.name.toLowerCase();
+          if(ln.match(/\.(png|jpe?g|gif|webp)$/)) showAssetModal(node);
+          else alert("Cannot view this asset type.");
+        });
+        m.append(va);
+        const da = document.createElement('div');
+        da.textContent="Delete Asset";
+        da.addEventListener('click',ev=>{
+          ev.stopPropagation(); hideProjContextMenu();
+          deleteAssetNode(node);
+          codeEditor.setValue("");
+          document.getElementById('propPanel').innerHTML="";
+        });
+        m.append(da);
+      }
+      else if(node.type==="module"||node.type==="class"){
+        const map={"Constant":"Constants","Method":"Methods","Property":"Properties","Enumeration":"Enumerations"};
+        ["Constant","Method","Property","Enumeration"].forEach(s=>{
+          const g=map[s];
+          const d = document.createElement('div');
+          d.textContent="Add "+s;
+          d.addEventListener('click',ev=>{
+            ev.stopPropagation(); hideProjContextMenu();
+            addSubNode(node,g,"Untitled");
+          });
+          m.append(d);
+        });
+        const del = document.createElement('div');
+        del.textContent=node.type==="module"?"Delete Module":"Delete Class";
+        del.addEventListener('click',ev=>{
+          ev.stopPropagation(); hideProjContextMenu();
+          if(confirm(`Delete this ${node.type} and all its content?`)){
+            deleteNode(node);
+            codeEditor.setValue("");
+            document.getElementById('propPanel').innerHTML="";
+            canvas.innerHTML="";
+          }
+        });
+        m.append(del);
+      }
+      else if(node.type==="group"){
+        const da = document.createElement('div');
+        da.textContent="Delete All";
+        da.addEventListener('click',ev=>{
+          ev.stopPropagation(); hideProjContextMenu();
+          if(confirm(`Delete ${node.name} and all its content?`)){
+            deleteGroupNode(node);
+          }
+        });
+        m.append(da);
+      }
+      else if(node.type==="code"){
+        const dc = document.createElement('div');
+        dc.textContent="Delete";
+        dc.addEventListener('click',ev=>{
+          ev.stopPropagation(); hideProjContextMenu();
+          deleteCodeNode(node);
+          codeEditor.setValue("");
+          document.getElementById('propPanel').innerHTML="";
+        });
+        m.append(dc);
+      }
+
+      m.style.left = e.pageX+"px";
+      m.style.top  = e.pageY+"px";
+      m.style.display = "block";
+      document.addEventListener('click', hideProjContextMenu);
+    }
+    function hideProjContextMenu() {
+      const m=document.getElementById('projContextMenu');
+      m.style.display="none"; m.innerHTML="";
+      document.removeEventListener('click', hideProjContextMenu);
+    }
+
+    /********** Asset Modal **********/
+    function showAssetModal(node){
+      const modal=document.getElementById('assetModal'),
+            img=document.getElementById('assetModalImage');
+      if(node.fileUrl){ img.src=node.fileUrl; modal.style.display="flex"; }
+      else alert("No image URL provided.");
+    }
+    document.getElementById('assetModalClose').addEventListener('click',()=>document.getElementById('assetModal').style.display="none");
+
+    /********** Delete Helpers **********/
+    function deleteAssetNode(an){
+      const ai=projectTree.children.findIndex(n=>n.type==="asset");
+      if(ai>-1){
+        const asn=projectTree.children[ai],
+              fi=asn.children.findIndex(c=>c.name===an.name&&c.type==="file");
+        if(fi>-1){
+          asn.children.splice(fi,1);
+          if(!asn.children.length) projectTree.children.splice(ai,1);
+          renderProjectTree();
+        }
+      }
+    }
+    function deleteNode(n){
+      const ix=projectTree.children.indexOf(n);
+      if(ix>-1) projectTree.children.splice(ix,1);
+      renderProjectTree();
+    }
+    function deleteCodeNode(cn){
+      function rec(p,t){
+        if(!p.children) return false;
+        const ix=p.children.indexOf(t);
+        if(ix>-1){ p.children.splice(ix,1); return true; }
+        for(const c of p.children) if(rec(c,t)) return true;
+        return false;
+      }
+      rec(projectTree,cn);
+      renderProjectTree();
+    }
+    function deleteGroupNode(gn){
+      function rec(p,t){
+        if(!p.children) return false;
+        const ix=p.children.indexOf(t);
+        if(ix>-1){ p.children.splice(ix,1); return true; }
+        for(const c of p.children) if(rec(c,t)) return true;
+        return false;
+      }
+      rec(projectTree,gn);
+      renderProjectTree();
+    }
+
+    /********** Add Subnode **********/
+    function addSubNode(parent, groupName, childName){
+      if(!parent.children) parent.children=[];
+      let g=parent.children.find(c=>c.type==="group"&&c.groupName===groupName);
+      if(!g){
+        g={ name:groupName,type:"group",groupName,collapsed:false,children:[] };
+        let ins=parent.children.length;
+        for(let i=0;i<parent.children.length;i++){
+          const c=parent.children[i];
+          if(c.type==="group" && groupOrder.indexOf(c.groupName)>groupOrder.indexOf(groupName)){
+            ins=i; break;
+          }
+        }
+        parent.children.splice(ins,0,g);
+      }
+      const cn={ name:"Untitled",type:"code",content:"",codeType:groupName };
+      if(groupName==="Constants"){ cn.defaultValue=""; cn.typeProp="Integer"; cn.scope="Public"; }
+      if(groupName==="Methods")    { cn.parameters=""; cn.returnType=""; cn.scope="Public"; }
+      if(groupName==="Properties"){ cn.propertyType=""; cn.defaultVal=""; cn.scope="Public"; }
+      if(groupName==="Enumerations"){ cn.values=""; cn.scope="Public"; }
+      g.children.push(cn);
+      renderProjectTree();
+    }
+
+    /********** Load View **********/
+    function loadView(viewNode){
+      saveCurrentView();
+      currentViewNode=viewNode;
+      currentCodeNode=null;
+      document.getElementById('editor').style.display="none";
+      canvas.style.display="block";
+      const d=viewNode.designer||{};
+      canvas.style.width  = (d.width||375)+"px";
+      canvas.style.height = (d.height||667)+"px";
+      canvas.style.backgroundColor = d.backgroundColor||"#ffffff";
+      canvas.innerHTML="";
+      (viewNode.controls||[]).forEach(item=>{
+        const type=item.dynamic.type,
+              defArr=defaultControls[type]?.default||[],
+              defs=convertDefaults(defArr),
+              ctrl=createControl(type,Object.assign({},defs,{
+                name:item.dynamic.name,
+                text:item.dynamic.text,
+                x: parseInt(item.left),
+                y: parseInt(item.top),
+                w: parseInt(item.width),
+                h: parseInt(item.height)
+              }));
+        Object.entries(item.dynamic).forEach(([k,v])=>ctrl.setAttribute("data-"+k,v));
+        updateControlDraw(ctrl);
+      });
+      renderPropertiesPanel();
+      updateCodeHeader();
+      renderProjectTree();
+    }
+
+    /********** Load Code Editor **********/
+    function loadCodeEditor(node){
+      if(currentCodeNode) currentCodeNode.content = codeEditor.getValue();
+      saveCurrentView();
+      currentViewNode=null;
+      currentCodeNode=node;
+      canvas.style.display="none";
+      document.getElementById('editor').style.display="block";
+      updateEditorSize();
+      codeEditor.setValue(node.content||"", -1);
+      renderPropertiesPanel();
+      updateCodeHeader();
+      renderProjectTree();
+    }
+
+    /********** Control Selection & Context Menu **********/
+    function selectControl(c){
+      if(selectedControl && selectedControl!==c){
+        selectedControl.classList.remove("selected");
+        hideResizeHandles(selectedControl);
+      }
+      selectedControl=c;
+      c.classList.add("selected");
+      showResizeHandles(c);
+      renderPropertiesPanel();
+      refreshTree();
+    }
+    canvas.addEventListener("contextmenu",e=>{
+      e.preventDefault();
+      const c=e.target.closest(".ui-control");
+      if(c){ selectControl(c); showContextMenu(e.pageX,e.pageY,c); }
+      else hideContextMenu();
+    });
+    function showContextMenu(x,y,c){
+      const m=document.getElementById("contextMenu");
+      m.style.left=x+"px"; m.style.top=y+"px"; m.style.display="block";
+      document.getElementById("cmRemove").onclick = ()=>{ removeControl(c); hideContextMenu(); };
+      document.getElementById("cmDuplicate").onclick = ()=>{ duplicateControl(c); hideContextMenu(); };
+    }
+    function hideContextMenu(){
+      document.getElementById("contextMenu").style.display="none";
+    }
+    document.addEventListener("click", hideContextMenu);
+
+    /********** Remove & Duplicate Controls **********/
+    function removeControl(c){
+      if(c.parentNode===canvas){
+        if(selectedControl===c){
+          c.classList.remove("selected");
+          hideResizeHandles(c);
+          selectedControl=null;
+          renderPropertiesPanel();
+        }
+        canvas.removeChild(c);
+        refreshTree();
+        codeEditor.setValue("");
+        document.getElementById("propPanel").innerHTML="";
+      }
+    }
+    function duplicateControl(c){
+      const x=parseInt(c.style.left)+20,
+            y=parseInt(c.style.top)+20,
+            w=parseInt(c.style.width),
+            h=parseInt(c.style.height),
+            t=c.getAttribute("data-type"),
+            nm=c.getAttribute("data-name"),
+            defArr=defaultControls[t]?.default||[],
+            defs=convertDefaults(defArr),
+            nc=createControl(t,Object.assign({},defs,{ name:nm, text:c.getAttribute("data-text"), x,y,w,h }));
+      selectControl(nc);
+    }
+
+    /********** Drag & Resize **********/
+    function initInteract(el){
+      interact(el)
+        .draggable({ ignoreFrom:".resize-handle", listeners:{ start:dragStartListener, move:dragMoveListener } })
+        .resizable({
+          allowFrom:".resize-handle",
+          edges:{ top:true,left:true,bottom:true,right:true },
+          modifiers:[
+            interact.modifiers.restrictEdges({ outer:canvas }),
+            interact.modifiers.restrictSize({ min:{ width:30, height:30 } })
+          ],
+          listeners:{ move:resizeMoveListener }
+        });
+    }
+    function dragStartListener(e){
+      const c=e.target.closest(".ui-control");
+      if(!c)return;
+      const cr=canvas.getBoundingClientRect(),
+            ox=(e.clientX-cr.left)/zoomLevel - parseFloat(c.style.left),
+            oy=(e.clientY-cr.top)/zoomLevel - parseFloat(c.style.top);
+      c._dragOffsetX=ox; c._dragOffsetY=oy;
+    }
+    function dragMoveListener(e){
+      const c=e.target.closest(".ui-control");
+      if(!c)return;
+      const cr=canvas.getBoundingClientRect(),
+            dx=(e.clientX-cr.left)/zoomLevel - c._dragOffsetX,
+            dy=(e.clientY-cr.top)/zoomLevel - c._dragOffsetY;
+      c.style.left=dx+"px"; c.style.top=dy+"px";
+      renderPropertiesPanel(); refreshTree(); updateControlDraw(c); saveCurrentView();
+    }
+    function resizeMoveListener(e){
+      const c=e.target.closest(".ui-control");
+      if(!c)return;
+      const dL=e.deltaRect.left/zoomLevel,
+            dT=e.deltaRect.top/zoomLevel,
+            bL=parseFloat(c.style.left)||0,
+            bT=parseFloat(c.style.top)||0,
+            nL=bL+dL,
+            nT=bT+dT,
+            nW=e.rect.width/zoomLevel,
+            nH=e.rect.height/zoomLevel;
+      c.style.left=nL+"px"; c.style.top=nT+"px";
+      c.style.width=nW+"px"; c.style.height=nH+"px";
+      renderPropertiesPanel(); refreshTree(); updateControlDraw(c); saveCurrentView();
+    }
+
+    /********** Resize Handles **********/
+    function showResizeHandles(c){
+      hideResizeHandles(c);
+      ["n","s","e","w","ne","nw","se","sw"].forEach(pos=>{
+        const h=document.createElement("div");
+        h.className="resize-handle "+pos;
+        h.addEventListener("mousedown",ev=>ev.stopPropagation());
+        c.append(h);
+      });
+    }
+    function hideResizeHandles(c){
+      c.querySelectorAll(".resize-handle").forEach(h=>h.remove());
+    }
+
+    /********** Properties Panel **********/
+    function renderPropertiesPanel(){
+      const propPanel = document.getElementById("propPanel");
+      propPanel.innerHTML = "";
+      const header = document.createElement("h3");
+      header.textContent = "Properties";
+      propPanel.appendChild(header);
+
+      // Code node branch
+      if(currentCodeNode){
+        let cfg = {};
+        if((currentCodeNode.type==="module"||currentCodeNode.type==="class")&&!currentCodeNode.codeType){
+          cfg = { name:{ type:"textfield", label:"Name", value:currentCodeNode.name||"Untitled" } };
+        } else {
+          switch(currentCodeNode.codeType){
+            case "Constants":
+              cfg = {
+                constantName:{ type:"textfield", label:"Constant Name", value:currentCodeNode.name||"Untitled" },
+                defaultValue:{ type:"textarea", label:"Default Value", value:currentCodeNode.defaultValue||"" },
+                typeProp:{ type:"combobox", label:"Type", value:currentCodeNode.typeProp||"Integer", options:["Integer","Double","String","Boolean","Color"] },
+                scope:{ type:"combobox", label:"Scope", value:currentCodeNode.scope||"Public", options:["Public","Private"] }
+              };
+              break;
+            case "Methods":
+              cfg = {
+                methodName:{ type:"textfield", label:"Method Name", value:currentCodeNode.name||"Untitled" },
+                parameters:{ type:"textarea", label:"Parameters", value:currentCodeNode.parameters||"" },
+                returnType:{ type:"textfield", label:"Return Type", value:currentCodeNode.returnType||"" },
+                scope:{ type:"combobox", label:"Scope", value:currentCodeNode.scope||"Public", options:["Public","Private"] }
+              };
+              break;
+            case "Properties":
+              cfg = {
+                propertyName:{ type:"textfield", label:"Name", value:currentCodeNode.name||"Untitled" },
+                propertyType:{ type:"textfield", label:"Type", value:currentCodeNode.propertyType||"" },
+                defaultVal:{ type:"textfield", label:"Default", value:currentCodeNode.defaultVal||"" },
+                scope:{ type:"combobox", label:"Scope", value:currentCodeNode.scope||"Public", options:["Public","Private"] }
+              };
+              break;
+            case "Enumerations":
+              cfg = {
+                enumName:{ type:"textfield", label:"Enumeration Name", value:currentCodeNode.name||"Untitled" },
+                values:{ type:"textarea", label:"Values", value:currentCodeNode.values||"" },
+                scope:{ type:"combobox", label:"Scope", value:currentCodeNode.scope||"Public", options:["Public","Private"] }
+              };
+              break;
+          }
+        }
+        Object.entries(cfg).forEach(([key,conf])=>{
+          const lbl = document.createElement("label");
+          lbl.textContent = conf.label+":";
+          let inp;
+          if(conf.type==="combobox"){
+            inp=document.createElement("select");
+            conf.options.forEach(o=>{
+              const opt=document.createElement("option");
+              opt.value=o; opt.textContent=o;
+              if(o===conf.value) opt.selected=true;
+              inp.append(opt);
+            });
+          } else if(conf.type==="textarea"){
+            inp=document.createElement("textarea");
+            inp.value=conf.value;
+          } else {
+            inp=document.createElement("input");
+            inp.type="text"; inp.value=conf.value;
+          }
+          inp.addEventListener("blur",()=>{
+            currentCodeNode[key]=inp.value;
+            if(["constantName","methodName","propertyName","enumName","name"].includes(key)){
+              currentCodeNode.name=inp.value;
+            }
+            renderProjectTree();
+            updateCodeHeader();
+          });
+          inp.addEventListener("keydown",e=>{
+            if(e.key==="Enter"){
+              currentCodeNode[key]=inp.value;
+              if(["constantName","methodName","propertyName","enumName","name"].includes(key)){
+                currentCodeNode.name=inp.value;
+              }
+              renderProjectTree();
+              updateCodeHeader();
+              inp.blur();
+            }
+          });
+          lbl.appendChild(inp);
+          propPanel.appendChild(lbl);
+        });
+        return;
+      }
+
+      // Selected control branch
+      if(selectedControl){
+        const defArr = defaultControls[selectedControl.getAttribute("data-type")]?.default||[];
+        const propTypes = getDefaultPropTypes(defArr);
+
+        // x/y/w/h
+        const coords = {
+          x: parseInt(selectedControl.style.left),
+          y: parseInt(selectedControl.style.top),
+          w: parseInt(selectedControl.style.width),
+          h: parseInt(selectedControl.style.height)
+        };
+        ["x","y","w","h"].forEach(k=>{
+          const lbl=document.createElement("label");
+          lbl.textContent = k.toUpperCase()+":";
+          const inp=document.createElement("input");
+          inp.type="number"; inp.value=coords[k];
+          inp.addEventListener("blur",()=>updateProperty(k,parseFloat(inp.value),"control"));
+          inp.addEventListener("keydown",e=>{ if(e.key==="Enter") inp.blur(); });
+          lbl.appendChild(inp);
+          propPanel.appendChild(lbl);
+        });
+
+        defArr.forEach(def=>{
+          const key=def.key;
+          if(["x","y","w","h"].includes(key)) return;
+          let raw=selectedControl.getAttribute("data-"+key);
+          if(raw===null) raw=def.value;
+          let val=raw;
+          if(def.type==="boolean") val=(raw==="true");
+          if(def.type==="number")  val=parseFloat(raw);
+          if(def.type==="color" && typeof raw==="string"&&raw.startsWith("rgb")) val=rgbToHex(raw);
+          if(def.type==="combobox"&&typeof raw==="string"){
+            try{ val=JSON.parse(raw);}catch{ val=raw.split("\n").map(s=>s.trim()).filter(s=>s);}
+          }
+          const lbl=document.createElement("label");
+          lbl.textContent = key.charAt(0).toUpperCase()+key.slice(1)+":";
+          const inputEl=getInputElementForType(def.type,val,key);
+          const tgt = inputEl.classList.contains("switch")? inputEl.querySelector("input"): inputEl;
+          tgt.addEventListener("blur",()=>{
+            let nv;
+            if(def.type==="boolean") nv=tgt.checked;
+            else if(def.type==="combobox") nv=inputEl.value.split("\n").map(s=>s.trim()).filter(s=>s);
+            else nv=tgt.value;
+            updateProperty(def.key,nv,"control");
+          });
+          tgt.addEventListener("keydown",e=>{ if(e.key==="Enter") tgt.blur(); });
+          lbl.appendChild(inputEl);
+          propPanel.appendChild(lbl);
+        });
+        return;
+      }
+
+      // Designer (view) branch
+      const dv = currentViewNode?.designer || { name:"", width:"", height:"", backgroundColor:"#ffffff" };
+      Object.entries(dv).forEach(([k,v])=>{
+        const lbl=document.createElement("label");
+        lbl.textContent = k.charAt(0).toUpperCase()+k.slice(1)+":";
+        const inp = getInputElementForType(k==="backgroundColor"?"color":"textfield", v, k);
+        inp.addEventListener("blur",()=>updateProperty(k,inp.value,"designer"));
+        inp.addEventListener("keydown",e=>{ if(e.key==="Enter") inp.blur(); });
+        lbl.appendChild(inp);
+        propPanel.appendChild(lbl);
+      });
+    }
+
+    /********** View Controls Tree **********/
+    function refreshTree(){
+      const tl=document.getElementById("treeList");
+      tl.innerHTML="";
+      const ctrls=Array.from(canvas.querySelectorAll(".ui-control"));
+      ctrls.forEach((c,i)=>c.style.zIndex=i);
+      ctrls.forEach(c=>{
+        const li=document.createElement("li");
+        li.draggable=true;
+        li.style.display="flex"; li.style.alignItems="center"; li.style.justifyContent="space-between"; li.style.marginBottom="8px";
+
+        const handle=document.createElement("div");
+        handle.innerHTML='<i class="fas fa-grip-lines" style="color:white;font-size:12px;"></i>';
+        const nameDiv=document.createElement("div");
+        nameDiv.className="name";
+        nameDiv.textContent=c.getAttribute("data-name");
+        const delBtn=document.createElement("button");
+        delBtn.textContent="×";
+        delBtn.style.background="#c00"; delBtn.style.color="#fff"; delBtn.style.border="none";
+        delBtn.style.borderRadius="2px"; delBtn.style.padding="2px 4px"; delBtn.style.fontSize="12px";
+        delBtn.addEventListener("click",e=>{
+          e.stopPropagation(); removeControl(c);
+        });
+
+        li.append(handle,nameDiv,delBtn);
+
+        li.addEventListener("click",e=>{
+          e.stopPropagation(); selectControl(c);
+          Array.from(tl.children).forEach(x=>x.classList.remove("selected-tree"));
+          li.classList.add("selected-tree");
+        });
+        li.addEventListener("dragstart",e=>{
+          e.dataTransfer.setData("text/plain",c.getAttribute("data-id"));
+        });
+        li.addEventListener("dragover",e=>e.preventDefault());
+        li.addEventListener("drop",e=>{
+          e.preventDefault();
+          const id=e.dataTransfer.getData("text/plain"),
+                dc=canvas.querySelector(`[data-id="${id}"]`);
+          let list=Array.from(canvas.querySelectorAll(".ui-control"));
+          list.splice(list.indexOf(dc),1);
+          const lis=Array.from(tl.children),
+                idx=lis.indexOf(li);
+          list.splice(idx,0,dc);
+          canvas.innerHTML="";
+          list.forEach(x=>canvas.append(x));
+          refreshTree();
+        });
+        if(c===selectedControl) li.classList.add("selected-tree");
+        tl.append(li);
+      });
+    }
+
+    /********** Create Control **********/
+    function createControl(type,defs){
+      controlCounter++;
+      const el=document.createElement("div");
+      el.className="ui-control";
+      el.style.left = (defs.x!==undefined?defs.x:20)+"px";
+      el.style.top  = (defs.y!==undefined?defs.y:20)+"px";
+      el.style.width  = (defs.w!==undefined?defs.w:100)+"px";
+      el.style.height = (defs.h!==undefined?defs.h:60)+"px";
+      el.setAttribute("data-id","ctrl_"+(++controlCounter));
+      el.setAttribute("data-type",type);
+      el.setAttribute("data-name",defs.name||type);
+      el.setAttribute("data-text",defs.text||"");
+      Object.entries(defs).forEach(([k,v])=>{
+        if(!["x","y","w","h","name","text"].includes(k)) el.setAttribute("data-"+k, v);
+      });
+
+      const defC=defaultControls[type];
+      if(defC?.drawFunc){
+        const cv=document.createElement("canvas");
+        cv.className="control-draw-canvas";
+        cv.style.width="100%"; cv.style.height="100%";
+        el.append(cv);
+        updateControlDraw(el);
+      } else {
+        const cc=document.createElement("div");
+        cc.className="control-content";
+        cc.textContent=defs.name||type;
+        el.append(cc);
+      }
+
+      el.addEventListener("mousedown",()=> selectControl(el));
+      el.addEventListener("contextmenu",e=>{
+        e.preventDefault();
+        selectControl(el);
+        showContextMenu(e.pageX,e.pageY,el);
+      });
+
+      initInteract(el);
+      canvas.append(el);
+      refreshTree();
+      return el;
+    }
+
+    /********** Keyboard Shortcuts **********/
+    document.addEventListener("keydown",e=>{
+      if(["INPUT","TEXTAREA"].includes(document.activeElement.tagName)) return;
+      if(!selectedControl) return;
+      let l=parseInt(selectedControl.style.left),
+          t=parseInt(selectedControl.style.top);
+      switch(e.key){
+        case "ArrowUp":
+          selectedControl.style.top=(t-1)+"px";
+          updateProperty("y",t-1,"control");
+          e.preventDefault();
+          break;
+        case "ArrowDown":
+          selectedControl.style.top=(t+1)+"px";
+          updateProperty("y",t+1,"control");
+          e.preventDefault();
+          break;
+        case "ArrowLeft":
+          selectedControl.style.left=(l-1)+"px";
+          updateProperty("x",l-1,"control");
+          e.preventDefault();
+          break;
+        case "ArrowRight":
+          selectedControl.style.left=(l+1)+"px";
+          updateProperty("x",l+1,"control");
+          e.preventDefault();
+          break;
+        case "Backspace":
+          removeControl(selectedControl);
+          selectedControl=null;
+          e.preventDefault();
+          break;
+      }
+    });
+
+    /********** Save / Load Project **********/
+    function saveDesign(){
+      if(currentCodeNode) currentCodeNode.content=codeEditor.getValue();
+      saveCurrentView();
+      const d={ projectTree };
+      const str="data:text/json,"+encodeURIComponent(JSON.stringify(d,null,2));
+      const a=document.createElement("a");
+      a.href=str; a.download="design.json"; a.click();
+    }
+    function loadDesign(file){
+      if(!Object.keys(defaultControls).length){
+        setTimeout(()=>loadDesign(file),500);
+        return;
+      }
+      const reader=new FileReader();
+      reader.onload=e=>{
+        const d=JSON.parse(e.target.result);
+        if(d.projectTree){
+          projectTree=d.projectTree;
+          renderProjectTree();
+          canvas.innerHTML="";
+          currentViewNode=null; currentCodeNode=null;
+          canvas.style.display="none";
+          document.getElementById("editor").style.display="none";
+          codeEditor.setValue("");
+          document.getElementById("propPanel").innerHTML="";
+        }
+      };
+      reader.readAsText(file);
+    }
+    document.getElementById("saveBtn").addEventListener("click", saveDesign);
+    document.getElementById("loadBtn").addEventListener("click", ()=>document.getElementById("fileInput").click());
+    document.getElementById("fileInput").addEventListener("change",e=>{
+      if(e.target.files.length) loadDesign(e.target.files[0]);
+    });
+
+    /********** Splitters **********/
+    // Horizontal
+    (()=>{ const split=document.getElementById("splitter");
+      let resizing=false, startY, startH;
+      split.addEventListener("mousedown",e=>{
+        resizing=true; startY=e.clientY;
+        startH=document.getElementById("propPanel").offsetHeight;
+        document.body.style.cursor="row-resize"; e.preventDefault();
+      });
+      document.addEventListener("mousemove",e=>{
+        if(!resizing) return;
+        let nh=startH+(e.clientY-startY),
+            tp=document.getElementById("tabPanel").getBoundingClientRect().height;
+        nh=Math.max(50,Math.min(nh,tp-50));
+        document.getElementById("propPanel").style.height=nh+"px";
+      });
+      document.addEventListener("mouseup",e=>{
+        if(resizing){ resizing=false; document.body.style.cursor="default"; }
+      });
+    })();
+    // Vertical left
+    (()=>{ const sp=document.getElementById("vSplitterLeft");
+      let vs=false, sx, we, wc;
+      sp.addEventListener("mousedown",e=>{
+        vs=true; sx=e.clientX;
+        we=document.getElementById("explorer-panel").offsetWidth;
+        wc=document.getElementById("canvas-container").offsetWidth;
+        document.body.style.cursor="col-resize"; e.preventDefault();
+      });
+      document.addEventListener("mousemove",e=>{
+        if(!vs) return;
+        const dx=e.clientX-sx;
+        let ne=we+dx, nc=wc-dx;
+        ne=Math.max(100,ne); nc=Math.max(100,nc);
+        document.getElementById("explorer-panel").style.width=ne+"px";
+        document.getElementById("canvas-container").style.flexBasis=nc+"px";
+        updateEditorSize();
+      });
+      document.addEventListener("mouseup",e=>{
+        if(vs){ vs=false; document.body.style.cursor="default"; updateEditorSize(); }
+      });
+    })();
+    // Vertical right
+    (()=>{ const sp=document.getElementById("vSplitterRight");
+      let vs=false, sx, wc, wt;
+      sp.addEventListener("mousedown",e=>{
+        vs=true; sx=e.clientX;
+        wc=document.getElementById("canvas-container").offsetWidth;
+        wt=document.getElementById("tabPanel").offsetWidth;
+        document.body.style.cursor="col-resize"; e.preventDefault();
+      });
+      document.addEventListener("mousemove",e=>{
+        if(!vs) return;
+        const dx=e.clientX-sx;
+        let nc=wc+dx, nt=wt-dx;
+        nc=Math.max(100,nc); nt=Math.max(100,nt);
+        document.getElementById("canvas-container").style.flexBasis=nc+"px";
+        document.getElementById("tabPanel").style.width=nt+"px";
+        updateEditorSize();
+      });
+      document.addEventListener("mouseup",e=>{
+        if(vs){ vs=false; document.body.style.cursor="default"; updateEditorSize(); }
+      });
+    })();
+
+    /********** Deselect on Canvas **********/
+    canvas.addEventListener("mousedown",e=>{
+      if(!e.target.closest(".ui-control")){
+        if(selectedControl){
+          selectedControl.classList.remove("selected");
+          hideResizeHandles(selectedControl);
+          selectedControl=null;
+        }
+        renderPropertiesPanel();
+        refreshTree();
+      }
+    });
+
+    /********** Resource Menu & Add **********/
+    (()=>{ const btn=document.getElementById("addResourceBtn"),
+            menu=document.getElementById("resourceMenu");
+      btn.addEventListener("click",e=>{
+        e.stopPropagation();
+        const r=btn.getBoundingClientRect();
+        menu.style.left=(r.right-120)+"px";
+        menu.style.top=(r.bottom)+"px";
+        menu.style.display="block";
+      });
+      document.addEventListener("click",()=>menu.style.display="none");
+      menu.querySelectorAll("div").forEach(item=>{
+        item.addEventListener("click",e=>{
+          e.stopPropagation();
+          const t=item.dataset.type;
+          menu.style.display="none";
+          if(t==="asset"){
+            document.getElementById("assetFileInput").click();
+          }
+          else if(t==="view"){
+            const nv={ name:"NewView",type:"view",collapsed:false,
+              designer:{ name:"NewView",width:375,height:667,backgroundColor:"#ffffff" },controls:[] };
+            projectTree.children.push(nv);
+            renderProjectTree();
+            loadView(nv);
+          }
+          else if(t==="module"){
+            const nm={ name:"NewModule",type:"module",collapsed:false,children:[],content:"" };
+            projectTree.children.push(nm);
+            renderProjectTree();
+            loadCodeEditor(nm);
+          }
+          else if(t==="class"){
+            const nc={ name:"NewClass",type:"class",collapsed:false,children:[],content:"" };
+            projectTree.children.push(nc);
+            renderProjectTree();
+            loadCodeEditor(nc);
+          }
+        });
+      });
+    })();
+
+    /********** Asset File Input **********/
+    document.getElementById("assetFileInput").addEventListener("change",e=>{
+      const files=Array.from(e.target.files),
+            fileData=files.map(f=>({ name:f.name,type:"file",fileUrl:"",filePath:"" }));
+      let an=projectTree.children.find(n=>n.type==="asset");
+      if(!an){
+        an={ name:"Assets",type:"asset",collapsed:false,children:[] };
+        projectTree.children.push(an);
+      }
+      fileData.forEach(f=>an.children.push(f));
+      renderProjectTree();
+      e.target.value="";
+    });
+
+    /********** Run/Build Placeholders **********/
+    document.getElementById("runBtn").addEventListener("click",e=>{ e.stopPropagation(); alert("Run action triggered"); });
+    document.getElementById("buildBtn").addEventListener("click",e=>{ e.stopPropagation(); alert("Build action triggered"); });
+
+    /********** Tab Switching **********/
+    document.querySelectorAll("#tabHeaders button").forEach(btn=>{
+      btn.addEventListener("click",()=>{
+        document.querySelectorAll("#tabHeaders button").forEach(x=>x.classList.remove("active"));
+        document.querySelectorAll(".tabContent").forEach(x=>x.classList.remove("active"));
+        btn.classList.add("active");
+        document.getElementById(btn.dataset.tab).classList.add("active");
+      });
+    });
+
+    /********** Load Toolbox from controls.json **********/
+    document.addEventListener("DOMContentLoaded",()=>{
+      toolboxBtn.disabled=true;
+      fetch('controls.json').then(r=>r.json()).then(data=>{
+        data.controls.forEach(ctrl=>{
+          defaultControls[ctrl.type]=ctrl;
+          if(ctrl.draw){
+            try{ ctrl.drawFunc=eval('('+ctrl.draw+')'); }catch(e){ console.error(e); }
+          }
+          const item=document.createElement("div");
+          item.className="toolbox-item";
+          item.dataset.type=ctrl.type;
+          item.dataset.label=ctrl.displayName;
+          if(ctrl.icon){
+            const img=document.createElement("img");
+            img.src=ctrl.icon;
+            img.style.maxWidth='40px';
+            img.style.maxHeight='40px';
+            item.append(img);
+          } else {
+            const sp=document.createElement("span");
+            sp.textContent=ctrl.displayName;
+            item.append(sp);
+          }
+          const nm=document.createElement("span");
+          nm.className="control-name";
+          nm.textContent=ctrl.displayName;
+          item.append(nm);
+          item.addEventListener("click",e=>{
+            e.stopPropagation();
+            const defs=convertDefaults(ctrl.default||[]);
+            const nc=createControl(ctrl.type,Object.assign({},defs,{ name:ctrl.displayName,text:defs.text }));
+            selectControl(nc);
+            renderPropertiesPanel();
+          });
+          document.getElementById("toolbox").append(item);
+        });
+        renderPropertiesPanel();
+        renderProjectTree();
+      }).catch(err=>console.error("controls.json load err",err));
+    });
+
+  </script>
+</body>
+</html>

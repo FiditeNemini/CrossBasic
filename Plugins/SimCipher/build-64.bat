@@ -1,0 +1,1 @@
+g++ -s -O3 -static -static-libgcc -static-libstdc++ -shared -o SimCipher.dll SimCipher.cpp

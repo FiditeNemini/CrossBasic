@@ -1,0 +1,1 @@
+g++ -s -shared -m64 -static -static-libgcc -static-libstdc++ -o FolderItem.dll FolderItem.cpp

@@ -1,0 +1,21 @@
+Starting tests for URL: /eval1.html
+Starting tests for URL: /eval2.html
+
+Metrics for URL /eval1.html:
+  Total Requests: 500
+  Successful Requests: 500
+  Failed Requests: 0
+  Average Response Time: 0.55 ms
+  Minimum Response Time: 0.30 ms
+  Maximum Response Time: 2.00 ms
+  Total Data Received: 42500 bytes
+---------------------------------------------------
+Metrics for URL /eval2.html:
+  Total Requests: 500
+  Successful Requests: 500
+  Failed Requests: 0
+  Average Response Time: 0.56 ms
+  Minimum Response Time: 0.28 ms
+  Maximum Response Time: 5.12 ms
+  Total Data Received: 42500 bytes
+---------------------------------------------------

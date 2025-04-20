@@ -1,0 +1,1 @@
+g++ server_eval.cpp -O3 -std=c++17 -s -static -static-libgcc -static-libstdc++ -l:libboost_system-mgw14-mt-s-x64-1_87.a -l:libboost_thread-mgw14-mt-s-x64-1_87.a -lws2_32 -lwsock32 -pthread -o server_eval.exe
