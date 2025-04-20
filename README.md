@@ -4,7 +4,7 @@ This is the very first cross-platform Compiler and VM written by AI and an Agent
 
 # What is CrossBasic?
 
-An open-source compiler and virtual machine for the Xojo language. Compile and Run CrossBasic programs at native machine-code speeds, on any system or architecture supporting C++ compilers [GNU/GCC/G++/clang]. This includes 99.9% of devices - even the web [using emscripten]! 🙏
+An open-source compiler and virtual machine for the Xojo programming language (akin to modern Visual Basic). Compile and Run CrossBasic programs at native machine-code speeds, on any system or architecture. This includes 99.9% of devices - even the web [using emscripten]! 🙏
 
 # CrossBasic Bytecode Compiler and Virtual Machine 🚀
 
