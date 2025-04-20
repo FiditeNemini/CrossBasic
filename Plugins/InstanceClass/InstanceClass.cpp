@@ -1,32 +1,58 @@
 // InstanceClass.cpp
-// Created by Matthew A Combatti
-// Simulanics Technologies and Xojo Developers Studio
-// -----------------------------------------------------------------------------
-// Copyright (c) 2025 …
-/*
-Build:
+// Created by Matthew A Combatti  
+// Simulanics Technologies and Xojo Developers Studio  
+// https://www.simulanics.com  
+// https://www.xojostudio.org  
+// DISCLAIMER: Simulanics Technologies and Xojo Developers Studio are not affiliated with Xojo, Inc.
+// -----------------------------------------------------------------------------  
+// Copyright (c) 2025 Simulanics Technologies and Xojo Developers Studio  
+//  
+// Permission is hereby granted, free of charge, to any person obtaining a copy  
+// of this software and associated documentation files (the "Software"), to deal  
+// in the Software without restriction, including without limitation the rights  
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell  
+// copies of the Software, and to permit persons to whom the Software is  
+// furnished to do so, subject to the following conditions:  
+//  
+// The above copyright notice and this permission notice shall be included in all  
+// copies or substantial portions of the Software.  
+//  
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR  
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,  
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE  
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER  
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,  
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE  
+// SOFTWARE.
+// ----------------------------------------------------------------------------- 
+/*  ── Build commands ────────────────────────────────────────────────────────────
   Windows (MinGW‑w64)
     g++ -std=c++17 -shared -m64 -static -static-libgcc -static-libstdc++ ^
         -o InstanceClass.dll InstanceClass.cpp -pthread
+
   Linux
     g++ -std=c++17 -shared -fPIC -o libInstanceClass.so InstanceClass.cpp -pthread
+
   macOS
     g++ -std=c++17 -dynamiclib -o libInstanceClass.dylib InstanceClass.cpp -pthread
 */
+
 #include <mutex>
 #include <unordered_map>
 #include <atomic>
 #include <string>
 #include <cstdlib>
+#include <cstring>     // <-- strdup
 #include <sstream>
 #include <thread>
 #include <chrono>
-#include <iostream>   // <-- debug output
+#include <iostream>    // <-- debug output
 #include <iomanip>
 
 #ifdef _WIN32
   #include <windows.h>
   #define XPLUGIN_API __declspec(dllexport)
+  #define strdup _strdup          // Windows uses _strdup
 #else
   #include <unistd.h>
   #define XPLUGIN_API __attribute__((visibility("default")))
@@ -36,10 +62,11 @@ Build:
 //  Debug helpers
 //==============================================================================
 #define DBG_PREFIX "InstanceClass DEBUG: "
-#define DBG(msg)  do { std::cout << DBG_PREFIX << msg << std::endl; } while(0)
+#define DBG(msg)  do { std::cout << DBG_PREFIX << msg << std::endl; } while (0)
 
 // forward declaration so the worker thread can invoke it
-static void triggerEvent(int handle, const std::string& eventName,
+static void triggerEvent(int handle,
+                         const std::string& eventName,
                          const char* param);
 
 //==============================================================================
@@ -57,8 +84,7 @@ private:
 public:
     explicit MyInstance(int h) : handle(h)
     {
-        DBG("Constructor(): Allocating new instance with handle "
-            << handle);
+        DBG("Constructor(): Allocating new instance with handle " << handle);
         running.store(true);
 
         // fire an OnTrigger every 2 seconds
@@ -106,16 +132,14 @@ public:
 //==============================================================================
 //  Global containers
 //==============================================================================
-static std::mutex                                      g_instancesMtx;
-static std::unordered_map<int, MyInstance*>            g_instances;
-static std::atomic<int>                                g_nextHandle{1};
+static std::mutex                                  g_instancesMtx;
+static std::unordered_map<int, MyInstance*>        g_instances;
+static std::atomic<int>                            g_nextHandle{1};
 
-static std::mutex                                      g_eventMtx;
-/*   handle  ─┬─> { "OnTrigger" → callbackPtr,
-                    … }
-*/
+static std::mutex                                  g_eventMtx;
+/*   handle  ─┬─> { "OnTrigger" → callbackPtr, … } */
 static std::unordered_map<int,
-        std::unordered_map<std::string, void*>>        g_eventCallbacks;
+        std::unordered_map<std::string, void*>>    g_eventCallbacks;
 
 //==============================================================================
 //  House‑keeping helpers
@@ -176,51 +200,49 @@ bool MyInstance_SetEventCallback(int handle,
 //==============================================================================
 //  triggerEvent  (worker thread → script)
 //==============================================================================
-//------------------------------------------------------------------------------
-// triggerEvent: Called by the event thread in MyInstance.
-//------------------------------------------------------------------------------
+// Called by the event thread in MyInstance.
 static void triggerEvent(int handle,
-    const std::string& eventName,
-    const char* param)
+                         const std::string& eventName,
+                         const char* param)
 {
-// ---- 1) grab the callback pointer while holding the lock ----------
-void* cbPtr = nullptr;
-{
-std::lock_guard<std::mutex> lk(g_eventMtx);
-auto hit = g_eventCallbacks.find(handle);
-if (hit != g_eventCallbacks.end())
-{
-auto eit = hit->second.find(eventName);
-if (eit != hit->second.end())
-cbPtr = eit->second;
+    // ---- 1) grab the callback pointer while holding the lock ----------
+    void* cbPtr = nullptr;
+    {
+        std::lock_guard<std::mutex> lk(g_eventMtx);
+        auto hit = g_eventCallbacks.find(handle);
+        if (hit != g_eventCallbacks.end())
+        {
+            auto eit = hit->second.find(eventName);
+            if (eit != hit->second.end())
+                cbPtr = eit->second;
+        }
+    }   // ← mutex released here
+
+    if (!cbPtr)
+    {
+        DBG("triggerEvent: no callback registered for handle "
+            << handle << " event \"" << eventName << '"');
+        return;
+    }
+
+    DBG("triggerEvent: handle=" << handle
+        << " eventName=\"" << eventName
+        << "\" param=" << (param ? param : "(null)")
+        << " cbPtr=" << cbPtr);
+
+    // ---- 2) finally invoke the callback *outside* the lock ------------
+    if (eventName == "OnTrigger")
+    {
+        using TriggerCB = void (*)(const char*);
+        auto cb = reinterpret_cast<TriggerCB>(cbPtr);
+
+        // make a durable copy of the payload, replicating TimeTicker’s pattern
+        char* safeStr = strdup(param ? param : "");
+        DBG("triggerEvent: invoking OnTrigger callback @" << cb);
+        cb(safeStr);
+        free(safeStr);
+    }
 }
-}   // ← mutex released here
-
-if (!cbPtr) {
-DBG("triggerEvent: no callback registered for handle "
-<< handle << " event \"" << eventName << '"');
-return;
-}
-
-DBG("triggerEvent: handle=" << handle
-<< " eventName=\"" << eventName
-<< "\" param=" << (param ? param : "(null)")
-<< " cbPtr=" << cbPtr);
-
-// ---- 2) finally invoke the callback *outside* the lock ------------
-if (eventName == "OnTrigger")
-{
-using TriggerCB = void (*)(const char*);
-auto cb = reinterpret_cast<TriggerCB>(cbPtr);
-
-// make a durable copy of the payload, replicating TimeTicker’s pattern
-char* safeStr = strdup(param ? param : "");
-DBG("triggerEvent: invoking OnTrigger callback @" << cb);
-cb(safeStr);
-free(safeStr);
-}
-}
-
 
 //==============================================================================
 //  ── Exported C interface ──
@@ -251,7 +273,7 @@ XPLUGIN_API void Close(int handle)
 }
 
 // ───────────────────────── Properties
-XPLUGIN_API void  Value_SET(int handle, double v)
+XPLUGIN_API void Value_SET(int handle, double v)
 {
     std::lock_guard<std::mutex> lk(g_instancesMtx);
     auto it = g_instances.find(handle);
@@ -295,13 +317,13 @@ typedef struct {
 
 static ClassProperty props[] = {
     { "Value",      "double", (void*)Value_GET, (void*)Value_SET },
-    { "OnTrigger",  "string", (void*)OnTrigger_GET, nullptr }
+    { "OnTrigger",  "string", (void*)OnTrigger_GET, nullptr      }
 };
 
 static ClassEntry methods[] = {
-    { "MultiplyTwoNumbers",       (void*)MultiplyTwoNumbers,       3,
+    { "MultiplyTwoNumbers",        (void*)MultiplyTwoNumbers,         3,
       { "integer", "double", "double" }, "double" },
-    { "MyInstance_SetEventCallback",(void*)MyInstance_SetEventCallback, 3,
+    { "MyInstance_SetEventCallback",(void*)MyInstance_SetEventCallback,3,
       { "integer","string","pointer" }, "boolean" }
 };
 

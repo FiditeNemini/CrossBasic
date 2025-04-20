@@ -43,3 +43,7 @@ Plugins/GUICPP/XGUI.res
 Plugins/JSONItem/JSONItem.dll
 Plugins/LLMConnection/deps/libcurl-x64.dll
 Plugins/SQLiteDatabase/deps/sqlite3.dll
+Plugins/SQLiteDatabase/SQLiteDatabase.dll
+Plugins/SQLiteStatement/SQLiteDatabase.dll
+Plugins/SQLiteStatement/SQLiteStatement.dll
+xcompile.res

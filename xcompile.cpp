@@ -182,7 +182,7 @@ int main(int argc, char* argv[]) {
     std::string textFilePath = argv[2];
     
     // Prevent the use of the base executable name.
-    if (targetExe == "xojoscript" || targetExe == "xojoscript.exe") {
+    if (targetExe == "crossbasic" || targetExe == "crossbasic.exe") {
         std::cerr << "Error: Cannot use base executable name as target.\n";
         return EXIT_FAILURE;
     }
@@ -193,9 +193,9 @@ int main(int argc, char* argv[]) {
     std::string baseDir = (pos != std::string::npos) ? currentPath.substr(0, pos + 1) : "";
     
     #ifdef _WIN32
-        const char* baseName = "xojoscript.exe";
+        const char* baseName = "crossbasic.exe";
     #else
-        const char* baseName = "xojoscript";
+        const char* baseName = "crossbasic";
     #endif
 
     // Build full path to the base executable:

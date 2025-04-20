@@ -42,10 +42,10 @@ done
 # Build plugins in subdirectories that contain a build.sh file
 ##############################
 for dir in */ ; do
-    if [ -f "$dir/build.sh" ]; then
-        echo "Found build.sh in $dir, executing..."
+    if [ -f "$dir/build-64.sh" ]; then
+        echo "Found build-64.sh in $dir, executing..."
         pushd "$dir" > /dev/null || continue
-        bash build.sh
+        bash build-64.sh
         popd > /dev/null
         if [[ "$OSTYPE" == "darwin"* ]]; then
             lib_ext="dylib"

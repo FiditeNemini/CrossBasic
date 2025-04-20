@@ -25,6 +25,21 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE  
 // SOFTWARE.
 // ----------------------------------------------------------------------------- 
+/*
+───────────────────────────────────────────────────────────────────────────────
+ Build commands
+───────────────────────────────────────────────────────────────────────────────
+ Windows (MinGW‑w64)
+   g++ -std=c++17 -shared -m64 -static -static-libgcc -static-libstdc++ ^
+       -o Shell.dll Shell.cpp -pthread
+
+ Linux
+   g++ -std=c++17 -shared -fPIC -o libShell.so Shell.cpp -pthread
+
+ macOS
+   g++ -std=c++17 -dynamiclib -o libShell.dylib Shell.cpp -pthread
+───────────────────────────────────────────────────────────────────────────────
+*/
 
 #include <string>
 #include <vector>
@@ -32,305 +47,294 @@
 #include <mutex>
 #include <memory>
 #include <iostream>
+#include <cstdlib>
+#include <cstring>   // ← strdup / _strdup
 
 #ifdef _WIN32
   #include <windows.h>
+  #define strdup  _strdup
+  #define XPLUGIN_API __declspec(dllexport)
 #else
   #include <unistd.h>
   #include <sys/wait.h>
   #include <fcntl.h>
   #include <signal.h>
+  #define XPLUGIN_API __attribute__((visibility("default")))
 #endif
 
-#define XPLUGIN_API __declspec(dllexport)
-
-//------------------------------------------------------------------------------
-// Shell Class Declaration
-// This class encapsulates shell execution: running a command, capturing output,
-// retrieving the exit code, setting a timeout, and killing the process if needed.
-//------------------------------------------------------------------------------
+// ─────────────────────────────────────────────────────────────────────────────
+//  Shell class – encapsulates a single shell/process invocation
+// ─────────────────────────────────────────────────────────────────────────────
 class Shell {
 public:
-    Shell() : exitCode(-1), running(false), timeoutSeconds(5) { }
+    Shell() : exitCode(-1), running(false), timeoutSeconds(5) {}
 
-    // Executes a shell command. Returns true on success.
-    bool Execute(const std::string& command) {
+    // Execute a command; capture stdout+stderr. Returns true on success.
+    bool Execute(const std::string& command)
+    {
         std::lock_guard<std::mutex> lock(shellMutex);
         output.clear();
         exitCode = -1;
-        running = true;
+        running  = true;
+
 #ifdef _WIN32
-        SECURITY_ATTRIBUTES saAttr;
-        saAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
-        saAttr.bInheritHandle = TRUE;
-        saAttr.lpSecurityDescriptor = NULL;
+        SECURITY_ATTRIBUTES saAttr{sizeof(SECURITY_ATTRIBUTES), nullptr, TRUE};
 
-        HANDLE hReadPipe, hWritePipe;
-        if (!CreatePipe(&hReadPipe, &hWritePipe, &saAttr, 0)) {
+        HANDLE hRead = nullptr, hWrite = nullptr;
+        if (!CreatePipe(&hRead, &hWrite, &saAttr, 0)) {
             running = false;
             return false;
         }
 
-        STARTUPINFO si = {0};
-        si.cb = sizeof(STARTUPINFO);
-        si.dwFlags = STARTF_USESTDHANDLES;
-        si.hStdOutput = hWritePipe;
-        si.hStdError = hWritePipe;
-        si.hStdInput = NULL;
+        STARTUPINFOA si{};
+        si.cb          = sizeof(STARTUPINFOA);
+        si.dwFlags     = STARTF_USESTDHANDLES;
+        si.hStdOutput  = hWrite;
+        si.hStdError   = hWrite;
 
-        ZeroMemory(&processInfo, sizeof(processInfo));
-        if (!CreateProcess(NULL, const_cast<char*>(command.c_str()),
-                           NULL, NULL, TRUE, CREATE_NO_WINDOW, NULL, NULL, &si, &processInfo)) {
+        ZeroMemory(&procInfo, sizeof(procInfo));
+
+        // CreateProcess wants a *modifiable* char*
+        std::vector<char> cmdBuf(command.begin(), command.end());
+        cmdBuf.push_back('\0');
+
+        if (!CreateProcessA(nullptr, cmdBuf.data(),
+                            nullptr, nullptr, TRUE,
+                            CREATE_NO_WINDOW, nullptr, nullptr,
+                            &si, &procInfo))
+        {
             running = false;
-            CloseHandle(hWritePipe);
-            CloseHandle(hReadPipe);
+            CloseHandle(hWrite);
+            CloseHandle(hRead);
             return false;
         }
-        CloseHandle(hWritePipe);
 
-        char buffer[128];
-        DWORD bytesRead;
-        while (ReadFile(hReadPipe, buffer, sizeof(buffer) - 1, &bytesRead, NULL) && bytesRead > 0) {
-            buffer[bytesRead] = '\0';
-            output += buffer;
+        CloseHandle(hWrite);               // parent only reads
+
+        char buf[256];
+        DWORD nRead = 0;
+        while (ReadFile(hRead, buf, sizeof(buf)-1, &nRead, nullptr) && nRead)
+        {
+            buf[nRead] = '\0';
+            output += buf;
         }
-        CloseHandle(hReadPipe);
+        CloseHandle(hRead);
 
-        WaitForSingleObject(processInfo.hProcess, timeoutSeconds * 1000);
-        DWORD exitCodeWin;
-        GetExitCodeProcess(processInfo.hProcess, &exitCodeWin);
-        exitCode = static_cast<int>(exitCodeWin);
+        WaitForSingleObject(procInfo.hProcess, timeoutSeconds * 1000);
 
-        CloseHandle(processInfo.hProcess);
-        CloseHandle(processInfo.hThread);
-#else
+        DWORD codeWin = 0;
+        GetExitCodeProcess(procInfo.hProcess, &codeWin);
+        exitCode = static_cast<int>(codeWin);
+
+        CloseHandle(procInfo.hProcess);
+        CloseHandle(procInfo.hThread);
+
+#else   // ───────────── POSIX ─────────────
         int pipefd[2];
         if (pipe(pipefd) == -1) {
             running = false;
             return false;
         }
+
         pid = fork();
         if (pid == -1) {
             running = false;
             return false;
         }
-        if (pid == 0) {
-            close(pipefd[0]);
+
+        if (pid == 0) {                    // child
+            close(pipefd[0]);              // close read end
             dup2(pipefd[1], STDOUT_FILENO);
             dup2(pipefd[1], STDERR_FILENO);
             close(pipefd[1]);
-            execl("/bin/sh", "sh", "-c", command.c_str(), (char*)NULL);
-            _exit(127);
+            execl("/bin/sh", "sh", "-c", command.c_str(), (char*)nullptr);
+            _exit(127);                    // exec failed
         }
-        close(pipefd[1]);
-        char buffer[128];
+
+        // parent
+        close(pipefd[1]);                  // close write end
+
+        char buf[256];
         ssize_t n;
-        while ((n = read(pipefd[0], buffer, sizeof(buffer) - 1)) > 0) {
-            buffer[n] = '\0';
-            output += buffer;
+        while ((n = read(pipefd[0], buf, sizeof(buf)-1)) > 0)
+        {
+            buf[n] = '\0';
+            output += buf;
         }
         close(pipefd[0]);
 
-        int status;
+        int status = 0;
         waitpid(pid, &status, 0);
-        if (WIFEXITED(status))
-            exitCode = WEXITSTATUS(status);
-        else
-            exitCode = -1;
+        exitCode = WIFEXITED(status) ? WEXITSTATUS(status) : -1;
 #endif
         running = false;
         return true;
     }
 
-    // Sets the execution timeout (in seconds).
-    void SetTimeout(int seconds) {
+    void SetTimeout(int seconds)
+    {
         std::lock_guard<std::mutex> lock(shellMutex);
         timeoutSeconds = (seconds > 0) ? seconds : 5;
     }
 
-    // Returns the captured output from the executed command.
-    std::string GetOutput() {
+    std::string GetOutput()
+    {
         std::lock_guard<std::mutex> lock(shellMutex);
         return output;
     }
 
-    // Returns the exit code of the executed command.
-    int GetExitCode() {
+    int GetExitCode()
+    {
         std::lock_guard<std::mutex> lock(shellMutex);
         return exitCode;
     }
 
-    // Kills the running process.
-    bool Kill() {
+    bool Kill()
+    {
         std::lock_guard<std::mutex> lock(shellMutex);
         if (!running) return false;
 #ifdef _WIN32
-        TerminateProcess(processInfo.hProcess, 1);
+        TerminateProcess(procInfo.hProcess, 1);
 #else
-        kill(pid, SIGKILL);
+        ::kill(pid, SIGKILL);
 #endif
         running = false;
         return true;
     }
 
-    // Closes the shell instance.
-    void Close() {
-        // Nothing additional to do; destruction is handled by Destroy.
-    }
+    void Close() { /* placeholder for symmetry; real cleanup in Destroy */ }
 
 private:
     std::string output;
-    int exitCode;
-    bool running;
-    int timeoutSeconds;
+    int         exitCode;
+    bool        running;
+    int         timeoutSeconds;
+
 #ifdef _WIN32
-    PROCESS_INFORMATION processInfo;
+    PROCESS_INFORMATION procInfo{};
 #else
-    pid_t pid;
+    pid_t pid{};
 #endif
     std::mutex shellMutex;
 };
 
-//------------------------------------------------------------------------------
-// Global Instance Management for Shell Objects
-//------------------------------------------------------------------------------
-static std::mutex globalShellMutex;
-static std::map<int, Shell*> shellMap;
-static int nextShellId = 1;
+// ─────────────────────────────────────────────────────────────────────────────
+//  Global instance management
+// ─────────────────────────────────────────────────────────────────────────────
+static std::mutex         g_mutex;
+static std::map<int, Shell*> g_shells;
+static int                g_nextId = 1;
 
-//------------------------------------------------------------------------------
-// Constructor: Creates a new Shell instance and returns its unique handle.
-//------------------------------------------------------------------------------
-extern "C" XPLUGIN_API int Constructor() {
-    std::lock_guard<std::mutex> lock(globalShellMutex);
-    int id = nextShellId++;
-    Shell* s = new Shell();
-    shellMap[id] = s;
+// ── Constructor ──────────────────────────────────────────────────────────────
+extern "C" XPLUGIN_API int Constructor()
+{
+    std::lock_guard<std::mutex> lk(g_mutex);
+    int id = g_nextId++;
+    g_shells[id] = new Shell;
     return id;
 }
 
-//------------------------------------------------------------------------------
-// Exported Functions (wrappers for class methods)
-//------------------------------------------------------------------------------
-extern "C" XPLUGIN_API bool Shell_Execute(int id, const char* command) {
-    std::lock_guard<std::mutex> lock(globalShellMutex);
-    auto it = shellMap.find(id);
-    if (it == shellMap.end()) return false;
-    return it->second->Execute(command);
+// ── Wrapper helpers ──────────────────────────────────────────────────────────
+static Shell* getShell(int id)
+{
+    auto it = g_shells.find(id);
+    return (it != g_shells.end()) ? it->second : nullptr;
 }
 
-extern "C" XPLUGIN_API void Shell_SetTimeout(int id, int seconds) {
-    std::lock_guard<std::mutex> lock(globalShellMutex);
-    auto it = shellMap.find(id);
-    if (it != shellMap.end())
-        it->second->SetTimeout(seconds);
+extern "C" XPLUGIN_API bool Shell_Execute(int id, const char* cmd)
+{
+    std::lock_guard<std::mutex> lk(g_mutex);
+    Shell* s = getShell(id);
+    return s ? s->Execute(cmd ? cmd : "") : false;
 }
 
-extern "C" XPLUGIN_API const char* Shell_Result(int id) {
-    std::lock_guard<std::mutex> lock(globalShellMutex);
-    auto it = shellMap.find(id);
-    if (it == shellMap.end()) return "";
-    static std::string result;
-    result = it->second->GetOutput();
-    return result.c_str();
+extern "C" XPLUGIN_API void Shell_SetTimeout(int id, int seconds)
+{
+    std::lock_guard<std::mutex> lk(g_mutex);
+    if (Shell* s = getShell(id)) s->SetTimeout(seconds);
 }
 
-extern "C" XPLUGIN_API int Shell_ExitCode(int id) {
-    std::lock_guard<std::mutex> lock(globalShellMutex);
-    auto it = shellMap.find(id);
-    if (it == shellMap.end()) return -1;
-    return it->second->GetExitCode();
+extern "C" XPLUGIN_API const char* Shell_Result(int id)
+{
+    std::lock_guard<std::mutex> lk(g_mutex);
+    static std::string tmp;
+    if (Shell* s = getShell(id)) tmp = s->GetOutput(); else tmp.clear();
+    return tmp.c_str();        // valid until next call
 }
 
-extern "C" XPLUGIN_API bool Shell_Kill(int id) {
-    std::lock_guard<std::mutex> lock(globalShellMutex);
-    auto it = shellMap.find(id);
-    if (it == shellMap.end()) return false;
-    return it->second->Kill();
+extern "C" XPLUGIN_API int Shell_ExitCode(int id)
+{
+    std::lock_guard<std::mutex> lk(g_mutex);
+    if (Shell* s = getShell(id)) return s->GetExitCode();
+    return -1;
 }
 
-extern "C" XPLUGIN_API bool Shell_Destroy(int id) {
-    std::lock_guard<std::mutex> lock(globalShellMutex);
-    auto it = shellMap.find(id);
-    if (it == shellMap.end()) return false;
+extern "C" XPLUGIN_API bool Shell_Kill(int id)
+{
+    std::lock_guard<std::mutex> lk(g_mutex);
+    if (Shell* s = getShell(id)) return s->Kill();
+    return false;
+}
+
+extern "C" XPLUGIN_API bool Shell_Destroy(int id)
+{
+    std::lock_guard<std::mutex> lk(g_mutex);
+    auto it = g_shells.find(id);
+    if (it == g_shells.end()) return false;
     delete it->second;
-    shellMap.erase(it);
+    g_shells.erase(it);
     return true;
 }
 
-//------------------------------------------------------------------------------
-// Class Definition Structures for the Shell class
-//------------------------------------------------------------------------------
+// ─────────────────────────────────────────────────────────────────────────────
+//  VM Class‑definition scaffolding
+// ─────────────────────────────────────────────────────────────────────────────
+typedef struct { const char* name; const char* type; void* getter; void* setter; } ClassProperty;
+typedef struct { const char* name; void* funcPtr; int arity; const char* paramTypes[10]; const char* retType; } ClassEntry;
+typedef struct { const char* declaration; } ClassConstant;
 typedef struct {
-    const char* name;
-    const char* type;
-    void* getter;
-    void* setter;
-} ClassProperty;
-
-typedef struct {
-    const char* name;
-    void* funcPtr;
-    int arity;
-    const char* paramTypes[10];
-    const char* retType;
-} ClassEntry;
-
-typedef struct {
-    const char* declaration;
-} ClassConstant;
-
-typedef struct {
-    const char* className;
-    size_t classSize;
-    void* constructor;
-    ClassProperty* properties;
-    size_t propertiesCount;
-    ClassEntry* methods;
-    size_t methodsCount;
-    ClassConstant* constants;
-    size_t constantsCount;
+    const char*     className;
+    size_t          classSize;
+    void*           constructor;
+    ClassProperty*  properties;
+    size_t          propertiesCount;
+    ClassEntry*     methods;
+    size_t          methodsCount;
+    ClassConstant*  constants;
+    size_t          constantsCount;
 } ClassDefinition;
 
-//------------------------------------------------------------------------------
-// Define the class properties for Shell.
-// Expose read-only properties "Result" and "ExitCode".
-static ClassProperty ShellProperties[] = {
-    { "Result", "string", (void*)Shell_Result, nullptr },
+// Properties
+static ClassProperty props[] = {
+    { "Result",   "string",  (void*)Shell_Result,  nullptr },
     { "ExitCode", "integer", (void*)Shell_ExitCode, nullptr }
 };
 
-//------------------------------------------------------------------------------
-// Define the class methods for Shell.
-static ClassEntry ShellMethods[] = {
-    { "Execute", (void*)Shell_Execute, 2, {"integer", "string"}, "boolean" },
-    { "SetTimeout", (void*)Shell_SetTimeout, 2, {"integer", "integer"}, "void" },
-    { "Kill", (void*)Shell_Kill, 1, {"integer"}, "boolean" },
-    { "Close", (void*)Shell_Destroy, 1, {"integer"}, "boolean" }
+// Methods
+static ClassEntry methods[] = {
+    { "Execute",    (void*)Shell_Execute,    2, {"integer","string"},   "boolean" },
+    { "SetTimeout", (void*)Shell_SetTimeout, 2, {"integer","integer"},  "void"    },
+    { "Kill",       (void*)Shell_Kill,       1, {"integer"},            "boolean" },
+    { "Close",      (void*)Shell_Destroy,    1, {"integer"},            "boolean" }
 };
 
-// No class constants defined.
-static ClassConstant ShellConstants[] = {};
+// (no constants)
+static ClassConstant consts[] = {};
 
-//------------------------------------------------------------------------------
-// Complete class definition for Shell.
-static ClassDefinition ShellClass = {
-    "Shell",                                      // className
-    sizeof(Shell),                                // classSize
-    (void*)Constructor,                           // constructor
-    ShellProperties,                              // properties
-    sizeof(ShellProperties) / sizeof(ClassProperty), // propertiesCount
-    ShellMethods,                                 // methods
-    sizeof(ShellMethods) / sizeof(ClassEntry),    // methodsCount
-    ShellConstants,                               // constants
-    sizeof(ShellConstants) / sizeof(ClassConstant) // constantsCount
+static ClassDefinition shellClass = {
+    "Shell",
+    sizeof(Shell),
+    (void*)Constructor,
+    props,   sizeof(props)/sizeof(props[0]),
+    methods, sizeof(methods)/sizeof(methods[0]),
+    consts,  sizeof(consts)/sizeof(consts[0])
 };
 
-//------------------------------------------------------------------------------
-// Exported function to return the class definition.
-extern "C" XPLUGIN_API ClassDefinition* GetClassDefinition() {
-    return &ShellClass;
-}
+extern "C" XPLUGIN_API ClassDefinition* GetClassDefinition() { return &shellClass; }
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Windows DLL entry‑point (optional cleanup could be added)
+// ─────────────────────────────────────────────────────────────────────────────
 
 #ifdef _WIN32
 extern "C" BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {

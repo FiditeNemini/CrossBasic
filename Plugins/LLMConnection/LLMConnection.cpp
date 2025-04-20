@@ -30,7 +30,7 @@
 //    g++ -shared -fPIC -o LLMConnectionPlugin.so LLMConnectionClass.cpp -lcurl
 // Build (Windows):
 //    g++ -shared -o LLMConnectionPlugin.dll LLMConnectionClass.cpp -static -lcurl -lcurl.dll
-#include <nlohmann/json.hpp>
+#include "nlohmann/json.hpp"
 #include "openai/openai.hpp"
 #include <string>
 #include <mutex>
