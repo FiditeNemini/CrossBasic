@@ -1,30 +1,22 @@
-// PluginTemplate.cpp
-// Created by Matthew A Combatti  
-// Simulanics Technologies and Xojo Developers Studio  
-// https://www.simulanics.com  
-// https://www.xojostudio.org  
-// DISCLAIMER: Simulanics Technologies and Xojo Developers Studio are not affiliated with Xojo, Inc.
-// -----------------------------------------------------------------------------  
-// Copyright (c) 2025 Simulanics Technologies and Xojo Developers Studio  
-//  
-// Permission is hereby granted, free of charge, to any person obtaining a copy  
-// of this software and associated documentation files (the "Software"), to deal  
-// in the Software without restriction, including without limitation the rights  
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell  
-// copies of the Software, and to permit persons to whom the Software is  
-// furnished to do so, subject to the following conditions:  
-//  
-// The above copyright notice and this permission notice shall be included in all  
-// copies or substantial portions of the Software.  
-//  
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR  
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,  
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE  
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER  
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,  
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE  
-// SOFTWARE.
-// ----------------------------------------------------------------------------- 
+/*
+
+  PluginTemplate.cpp
+  CrossBasic Plugin: PluginTemplate                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      4r
+ 
+  Copyright (c) 2025 Simulanics Technologies – Matthew Combatti
+  All rights reserved.
+ 
+  Licensed under the CrossBasic Source License (CBSL-1.1).
+  You may not use this file except in compliance with the License.
+  You may obtain a copy of the License at:
+  https://www.crossbasic.com/license
+ 
+  SPDX-License-Identifier: CBSL-1.1
+  
+  Author:
+    The AI Team under direction of Matthew Combatti <mcombatti@crossbasic.com>
+    
+*/ 
 // Build (Windows): g++ -shared -fPIC -o PluginTemplate.dll PluginTemplate.cpp 
 // Build (macOS/Linux): g++ -shared -fPIC -o PluginTemplate.dylib/so PluginTemplate.cpp
 
@@ -35,8 +27,6 @@
 #include <windows.h>
 #define XPLUGIN_API __declspec(dllexport)
 #else
-#include <unistd.h> // for usleep on Unix
-#include <sched.h>  // for sched_yield on Unix
 #define XPLUGIN_API __attribute__((visibility("default")))
 #endif
 
@@ -84,55 +74,12 @@ extern "C" {
             return Fibonacci(n2 - 1) + Fibonacci(n2 - 2);
     }
 
-    // Cross platform Beep function: Beep(Frequency as Integer, Duration as Integer) as Boolean
-    XPLUGIN_API bool XBeep(int frequency, int duration) {
-    #ifdef _WIN32
-        return ::Beep(frequency, duration) != 0;
-    #else
-        std::printf("\a");
-        std::fflush(stdout);
-        usleep(duration * 1000); // usleep takes microseconds
-        return true;
-    #endif
-    }
-
-    // Cross platform Sleep function (renamed to PluginSleep to avoid naming conflicts):
-    // Sleep(Milliseconds) as Boolean
-    XPLUGIN_API bool PluginSleep(int ms) {
-    #ifdef _WIN32
-        Sleep(ms);
-    #else
-        usleep(ms * 1000);
-    #endif
-        return true;
-    }
-	
-	// **DoEvents() Function** - Allows UI events to be processed
-    XPLUGIN_API void DoEvents() {
-    #ifdef _WIN32
-        // Process pending UI messages
-        MSG msg;
-        while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
-        }
-        // Allow Windows to handle UI input
-        MsgWaitForMultipleObjectsEx(0, nullptr, 0, QS_ALLINPUT, MWMO_INPUTAVAILABLE);
-    #else
-        // Yield CPU to allow other tasks to run
-        sched_yield();
-    #endif
-    }
-
     // Static array of plugin method entries; add more entries as needed.
     static PluginEntry pluginEntries[] = {
-        { "AddTwoNumbers", (void*)addtwonumbers, 2, {"double", "double"}, "double" },
-        { "SayHello", (void*)sayhello, 1, {"string"}, "string" },
-        { "Factorial", (void*)factorial, 1, {"integer"}, "integer" },
-        { "Fibonacci", (void*)Fibonacci, 1, {"integer"}, "integer" },
-        { "Beep", (void*)XBeep, 2, {"integer", "integer"}, "boolean" },
-        { "Sleep", (void*)PluginSleep, 1, {"integer"}, "boolean" },
-        { "DoEvents", (void*)DoEvents, 0, {}, "boolean" } // Added DoEvents function
+        { "AddTwoNumbers", (void*)addtwonumbers, 2, {"double",  "double"},    "double" },
+        { "SayHello",      (void*)sayhello,      1, {"string"},               "string" },
+        { "Factorial",     (void*)factorial,     1, {"integer"},              "integer" },
+        { "Fibonacci",     (void*)Fibonacci,     1, {"integer"},              "integer" }
     };
 
     // Exported function to retrieve the plugin entries.

@@ -51,7 +51,7 @@ if b = true then
 	Set_FontName("MyTime", "Calibri")
     Set_FontSize("MyTime", 18)
     
-    XAddCalendarControl("MyCalendar", "MainWin", 320, 140, 185, 165)
+    XAddCalendarControl("MyCalendar", "MainWin", 320, 140, 225, 160)
     
     XAddLabel("MyLabel", "MainWin", "Hello, World! <3", 320, 340, 300, 42)
 	Set_FontName("MyLabel", "Curlz MT")
@@ -111,14 +111,16 @@ var progress as Integer = 0
 while true
 	progress = progress + 1
 	ProgressBar_SetValue("MyProgress", progress)
-    print("Progress value: " + str(ProgressBar_GetValue("MyProgress")))
+    'print("Progress value: " + str(ProgressBar_GetValue("MyProgress")))
 	if progress = 100 then
 	   progress = 1
 	end if
-    DoEvents()
-    if ProgressBar_GetValue("MyProgress") = 0 then
+
+    Dim pval as Integer = ProgressBar_GetValue("MyProgress")
+    
+    if pval = 0 then
         return 0
     end if
     
-	Sleep(50)
+	DoEvents(50)
 wend

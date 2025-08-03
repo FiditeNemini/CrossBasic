@@ -4,313 +4,138 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma"        content="no-cache">
   <meta http-equiv="Expires"       content="0">
+  <title>CrossBasic IDE</title>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <link rel="shortcut icon" href="app.ico">
+  <meta http-equiv="cache-control" content="max-age=0" />
+  <meta http-equiv="cache-control" content="no-store" />
+  <meta http-equiv="expires" content="-1" />
+  <meta http-equiv="expires" content="Tue, 01 Jan 1980 1:00:00 GMT" />
+  <meta http-equiv="pragma" content="no-cache" />
+  <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="16x16" href="img/slogo-16.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="img/slogo-32.png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="#4A90E2">
+  <meta name="apple-mobile-web-app-title" content="CrossBasic IDE">
+  <link rel="apple-touch-startup-image" href="img/640x1136.png" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+  <link rel="apple-touch-startup-image" href="img/750x1294.png" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+  <link rel="apple-touch-startup-image" href="img/1242x2148.png" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+  <link rel="apple-touch-startup-image" href="img/1125x2436.png" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+  <link rel="apple-touch-startup-image" href="img/1536x2048.png" media="(min-device-width: 768px) and (max-device-width: 1024px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+  <link rel="apple-touch-startup-image" href="img/1668x2224.png" media="(min-device-width: 834px) and (max-device-width: 834px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+  <link rel="apple-touch-startup-image" href="img/2048x2732.png" media="(min-device-width: 1024px) and (max-device-width: 1024px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+  <link rel="apple-touch-icon" sizes="192x192" href="img/slogo-192.png">
+  <link rel="mask-icon" href="img/slogo-32.png" color="#6F6F6F">
+  <meta name="msapplication-TileColor" content="#FFFFFF">
+  <meta name="theme-color" content="#4A90E2">
 
-  <meta charset="UTF-8">
-  <!-- Added favicon for browsers and webapps -->
-  <link rel="icon" href="/icons/icon.png">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Crossbasic IDE 2025 Release 1 - Beta</title>
-  <!-- Include FontAwesome Icons -->
+  <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
-  <!-- Include interact.js -->
+  <!-- interact.js -->
   <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
-  <!-- Include Ace Editor -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.39.1/ace.min.js" integrity="sha512-WgH9t1qfGMsgkGm6j8zrhj8UHqry1q+guPAJPGqIeWAVjs9/JsSUwAzdOLGvckuF+cbGie2XUYEKhCNybk5dTg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  
+  <!-- Ace Editor -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.39.1/ace.min.js"
+    integrity="sha512-WgH9t1qfGMsgkGm6j8zrhj8UHqry1q+guPAJPGqIeWAVjs9/JsSUwAzdOLGvckuF+cbGie2XUYEKhCNybk5dTg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.39.1/ext-language_tools.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&display=swap" rel="stylesheet">
-  
+
   <style>
-    /* Dark mode scrollbars */
+    /* Dark scrollbars */
     ::-webkit-scrollbar { width: 8px; height: 8px; background-color: #333; }
     ::-webkit-scrollbar-track { background-color: #2b2b2b; }
     ::-webkit-scrollbar-thumb { background-color: #555; border-radius: 4px; border: 2px solid #2b2b2b; }
     ::-webkit-scrollbar-thumb:hover { background-color: #777; }
     * { scrollbar-width: thin; scrollbar-color: #555 #2b2b2b; }
 
-    /* Basic reset and layout */
+    /* Layout Reset */
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font: 14px sans-serif; height: 100vh; display: flex; flex-direction: column; }
+    body { font: 14px sans-serif; height: 100vh; display: flex; flex-direction: column; min-width: 1100px; min-height: 850px; }
 
-    /* Toolbar with three sections */
-    #toolbar {
-      background: #030303;
-      color: #fff;
-      padding: 8px;
-      height: 56px;
-      display: flex;
-      align-items: center;
-    }
-    #leftButtons, #centerButtons, #rightButtons {
-      flex: 1;
-      display: flex;
-      align-items: center;
-    }
-    #leftButtons { justify-content: flex-start; }
-    #centerButtons { justify-content: center; }
-    #rightButtons { justify-content: flex-end; }
+    /* Toolbar */
+    #toolbar { background: #030303; color: #fff; padding: 8px; height: 56px; display: flex; align-items: center; }
+    #leftButtons, #centerButtons, #rightButtons { flex: 1; display: flex; align-items: center; }
+    #leftButtons { justify-content: flex-start; } #centerButtons { justify-content: center; } #rightButtons { justify-content: flex-end; }
     #toolbar button { padding: 6px 12px; cursor: pointer; background: #444; color: #fff; border: none; margin-right: 8px; }
     #toolbar button:hover { background: #555; }
 
-    /* Main container with vertical splitters */
+    /* Main container + panels */
     #container { flex: 1; display: flex; overflow: hidden; }
-
-    /* Explorer Panel */
-    #explorer-panel {
-      width: 320px;
-      background: #333;
-      border-right: 1px solid #444;
-      padding: 8px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      color: #fff;
-    }
+    #explorer-panel { width: 320px; background: #333; border-right: 1px solid #444; padding: 8px; overflow-y: auto; display: flex; flex-direction: column; color: #fff; }
     #explorerHeader { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
     #explorerHeader h3 { margin: 0; }
     #addResourceBtn { background: none; border: none; color: #fff; cursor: pointer; font-size: 18px; }
     #addResourceBtn:hover { color: #0f0; }
-    #resourceMenu {
-      display: none;
-      position: absolute;
-      background: #444;
-      border: 1px solid #555;
-      padding: 4px 0;
-      z-index: 200;
-      min-width: 120px;
-    }
+    #resourceMenu { display: none; position: absolute; background: #444; border: 1px solid #555; padding: 4px 0; z-index: 200; min-width: 120px; }
     #resourceMenu div { padding: 6px 12px; cursor: pointer; color: #fff; font-size: 14px; }
     #resourceMenu div:hover { background: #555; }
 
-    #explorerTree {
-      flex: 1;
-      background: #222;
-      border: 1px solid #444;
-      padding: 4px;
-      color: #fff;
-      overflow-y: auto;
-    }
+    #explorerTree { flex: 1; background: #222; border: 1px solid #444; padding: 4px; color: #fff; overflow-y: auto; }
     #explorerList { list-style: none; padding-left: 10px; }
     #explorerList ul { list-style: none; margin-left: 20px; padding-left: 0; }
-    #explorerList li .tree-item-header {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      padding: 4px;
-      cursor: pointer;
-      border-radius: 3px;
+    #explorerList li .tree-item-header { display: flex; align-items: center; gap: 4px; padding: 4px; cursor: pointer; border-radius: 3px; }
+    /* highlight **only** the clickable row, not the whole branch */
+    #explorerList li.selected-tree > .tree-item-header{
+      background-color:#666;
     }
-    #explorerList li.selected-tree { background-color: #666; }
+
     #explorerList li img { width: 16px; height: 16px; }
 
-    #projContextMenu {
-      display: none;
-      position: absolute;
-      background: #444;
-      border: 1px solid #555;
-      padding: 4px 0;
-      z-index: 300;
-      min-width: 140px;
-      color: #fff;
-    }
+    #projContextMenu { display: none; position: absolute; background: #444; border: 1px solid #555; padding: 4px 0; z-index: 300; min-width: 140px; color: #fff; }
     #projContextMenu div { padding: 6px 12px; cursor: pointer; font-size: 14px; }
     #projContextMenu div:hover { background: #555; }
 
-    #assetModal {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.8);
-      z-index: 500;
-      justify-content: center;
-      align-items: center;
-    }
+    #assetModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 500; justify-content: center; align-items: center; }
     #assetModalContent { position: relative; max-width: 90%; max-height: 90%; }
     #assetModalContent img { max-width: 100%; max-height: 100%; display: block; }
-    #assetModalClose {
-      position: absolute; top: -10px; right: -10px;
-      background: #fff; color: #000; width: 24px; height: 24px;
-      border-radius: 50%; text-align: center; line-height: 24px;
-      cursor: pointer; font-weight: bold;
-    }
+    #assetModalClose { position: absolute; top: -10px; right: -10px; background: #fff; color: #000; width: 24px; height: 24px; border-radius: 50%; text-align: center; line-height: 24px; cursor: pointer; font-weight: bold; }
 
     #vSplitterLeft { width: 5px; background: #444; cursor: col-resize; }
+    #vSplitterRight { width: 5px; background: #444; cursor: col-resize; }
 
-    /* Canvas Container – Designer / Code Editor */
-    #canvas-container {
-      flex: 1;
-      position: relative;
-      background: #222;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    #canvas {
-      position: relative;
-      width: 375px; height: 667px;
-      background: #fff;
-      border: 1px solid #ccc;
-      touch-action: none;
-      transform-origin: center center;
-      display: none;
-    }
-    #codeHeader {
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 24px;
-      background: #111;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      padding: 0 10px;
-      font-size: 14px;
-      z-index: 1010;
-    }
-    #editor {
-      position: absolute;
-      top: 24px; left: 0; right: 0; bottom: 0;
-      display: none;
-    }
+    #canvas-container { flex: 1; position: relative; background: #222; display: flex; justify-content: center; align-items: center; }
+    #canvas { position: relative; background: #fff; border: 1px solid #ccc; touch-action: none; transform-origin: center center; display: none; }
+    #codeHeader { position: absolute; top: 0; left: 0; right: 0; height: 24px; background: #111; color: #fff; display: flex; align-items: center; padding: 0 10px; font-size: 14px; z-index: 1010; }
+    #editor { position: absolute; top: 24px; left: 0; right: 0; bottom: 0; display: none; }
 
-    /* Zoom Control – hidden by default */
-    #zoomControl {
-      position: absolute; bottom: 10px; right: 10px;
-      background: #444; border: 1px solid #555;
-      border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-      z-index: 1000; display: none;
-      align-items: center; padding: 2px;
-    }
-    #zoomControl input {
-      width: 50px; text-align: center;
-      margin-right: 4px; margin-left: 6px;
-      background: #333; color: #fff; border: 1px solid #555;
-    }
-    #zoomControl button {
-      border: none; background: transparent;
-      padding: 6px 10px; cursor: pointer;
-      color: #fff; font-size: 16px;
-    }
+    #zoomControl { position: absolute; bottom: 10px; right: 10px; background: #444; border: 1px solid #555; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); z-index: 1000; display: none; align-items: center; padding: 2px; }
+    #zoomControl input { width: 50px; text-align: center; margin-right: 4px; margin-left: 6px; background: #333; color: #fff; border: 1px solid #555; }
+    #zoomControl button { border: none; background: transparent; padding: 6px 10px; cursor: pointer; color: #fff; font-size: 16px; }
 
-    /* Tab Panel */
-    #tabPanel {
-      width: 281px;
-      background: #333;
-      border-left: 1px solid #444;
-      display: flex;
-      flex-direction: column;
-      color: #fff;
-    }
-    #tabHeaders {
-      display: flex;
-      border-bottom: 1px solid #444;
-    }
-    #tabHeaders button {
-      flex: 1; padding: 8px;
-      background: #444; border: none;
-      cursor: pointer; font-size: 14px;
-      color: #fff;
-    }
-    #tabHeaders button.active {
-      background: #222; border-bottom: 2px solid #007bff;
-    }
-    #tabHeaders button:disabled {
-      opacity: 0.4; cursor: default;
-    }
-    #tabContents {
-      flex: 1; overflow-y: auto; background: #333;
-    }
-    .tabContent {
-      display: none;
-      height: 100%;
-      padding: 8px;
-    }
+    #tabPanel { width: 281px; background: #333; border-left: 1px solid #444; display: flex; flex-direction: column; color: #fff; }
+    #tabHeaders { display: flex; border-bottom: 1px solid #444; }
+    #tabHeaders button { flex: 1; padding: 8px; background: #444; border: none; cursor: pointer; font-size: 14px; color: #fff; }
+    #tabHeaders button.active { background: #222; border-bottom: 2px solid #007bff; }
+    #tabHeaders button:disabled { opacity: 0.4; cursor: default; }
+    #tabContents { flex: 1; overflow-y: auto; background: #333; }
+    .tabContent { display: none; height: 100%; padding: 8px; }
     .tabContent.active { display: block; }
 
-    /* Toolbox */
-    #toolbox {
-      display: flex; flex-wrap: wrap; gap: 8px;
-    }
-    .toolbox-item {
-      width: 60px; height: 60px;
-      border: 1px solid #555;
-      border-radius: 4px;
-      background: #444;
-      display: flex; flex-direction: column;
-      justify-content: center; align-items: center;
-      cursor: pointer; user-select: none;
-      position: relative; color: #fff;
-    }
+    #toolbox { display: flex; flex-wrap: wrap; gap: 8px; }
+    .toolbox-item { width: 60px; height: 60px; border: 1px solid #555; border-radius: 4px; background: #444; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; user-select: none; position: relative; color: #fff; }
     .toolbox-item:hover { background: #555; }
-    .toolbox-item .control-name {
-      position: absolute;
-      bottom: 2px; left: 0; right: 0;
-      text-align: center; font-size: 10px;
-      background: rgba(0,0,0,0.7);
-      color: #fff;
-      border-radius: 2px;
-      display: none;
-    }
+    .toolbox-item .control-name { position: absolute; bottom: 2px; left: 0; right: 0; text-align: center; font-size: 10px; background: rgba(0,0,0,0.7); color: #fff; border-radius: 2px; display: none; }
     .toolbox-item:hover .control-name { display: block; }
 
-    /* Properties Panel */
-    #propPanel {
-      padding: 8px; overflow-y: auto;
-      height: 50%; background: #444;
-      color: #fff;
-    }
+    #propPanel { padding: 8px; overflow-y: auto; height: 50%; background: #444; color: #fff; }
     #propPanel h3 { margin-bottom: 8px; color: #fff; }
-    #propPanel label {
-      display: block;
-      margin-top: 6px;
-      margin-bottom: 4px;
-      font-size: 13px;
-      color: #fff;
-    }
-    #propPanel input,
-    #propPanel textarea,
-    #propPanel select {
-      width: 100%;
-      padding: 4px;
-      font-size: 13px;
-      margin-bottom: 4px;
-      margin-top: 4px;
-      background: #333;
-      color: #fff;
-      border: 1px solid #555;
-    }
-    #splitter {
-      height: 5px;
-      background: #141414;
-      cursor: row-resize;
-      margin-top: 8px;
-      margin-bottom: 8px;
-    }
+    #propPanel label { display: block; margin-top: 6px; margin-bottom: 4px; font-size: 13px; color: #fff; }
+    #propPanel input, #propPanel textarea, #propPanel select { width: 100%; padding: 4px; font-size: 13px; margin-bottom: 4px; margin-top: 4px; background: #333; color: #fff; border: 1px solid #555; }
+    #splitter { height: 5px; background: #141414; cursor: row-resize; margin-top: 8px; margin-bottom: 8px; }
 
-    /* View Controls Pane */
-    #treeView {
-      flex: 1; overflow-y: auto;
-      padding: 8px; background: #444;
-      color: #fff; display: none;
-    }
+    #treeView { flex: 1; overflow-y: auto; padding: 8px; background: #444; color: #fff; display: none; }
     #treeView h3 { margin-bottom: 8px; color: #fff; }
     #treeList li { margin-bottom: 4px; }
 
-    /* Designer Controls */
-    .ui-control {
-      position: absolute; border: none; touch-action: none;
-    }
+    .ui-control { position: absolute; border: none; touch-action: none; }
     .ui-control.selected { outline: 2px dashed #007bff; }
-
     .control-draw-canvas { display: block; }
 
-    /* Resize Handles */
-    .resize-handle {
-      position: absolute; width: 8px; height: 8px;
-      background: #007bff; border: 1px solid #fff;
-      border-radius: 50%; pointer-events: auto;
-      touch-action: none; z-index: 10;
-    }
+    .resize-handle { position: absolute; width: 8px; height: 8px; background: #007bff; border: 1px solid #fff; border-radius: 50%; pointer-events: auto; touch-action: none; z-index: 10; }
     .resize-handle.n  { top: -4px; left: 50%; transform: translateX(-50%); cursor: ns-resize; }
     .resize-handle.s  { bottom: -4px; left: 50%; transform: translateX(-50%); cursor: ns-resize; }
     .resize-handle.e  { right: -4px; top: 50%; transform: translateY(-50%); cursor: ew-resize; }
@@ -320,55 +145,32 @@
     .resize-handle.se { bottom: -4px; right: -4px; cursor: nwse-resize; }
     .resize-handle.sw { bottom: -4px; left: -4px; cursor: nesw-resize; }
 
-    #contextMenu {
-      position: absolute; background: #444; border: 1px solid #555;
-      box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
-      display: none; z-index: 100; color: #fff;
-    }
+    #contextMenu { position: absolute; background: #444; border: 1px solid #555; box-shadow: 2px 2px 5px rgba(0,0,0,0.2); display: none; z-index: 100; color: #fff; }
     #contextMenu div { padding: 8px 12px; cursor: pointer; font-size: 14px; }
     #contextMenu div:hover { background: #555; }
 
-    #statusBar {
-      height: 24px; background: #030303; color: #fff;
-      display: flex; align-items: center;
-      padding: 0 8px; font-size: 13px;
-      justify-content: space-between;
-    }
+    #statusBar { height: 24px; background: #030303; color: #fff; display: flex; align-items: center; padding: 0 8px; font-size: 13px; justify-content: space-between; }
     #statusRight { text-align: right; }
 
-    /* Custom Switch */
-    .switch {
-      position: relative; display: inline-block;
-      width: 40px; height: 20px;
-    }
+    .switch { position: relative; display: inline-block; width: 40px; height: 20px; }
     .switch input { opacity: 0; width: 0; height: 0; }
-    .slider {
-      position: absolute; cursor: pointer;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background-color: #ccc; transition: .4s;
-      border-radius: 20px;
-    }
-    .slider:before {
-      position: absolute; content: "";
-      height: 16px; width: 16px;
-      left: 2px; bottom: 2px;
-      background-color: white; transition: .4s;
-      border-radius: 50%;
-    }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 20px; }
+    .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; }
     .switch input:checked + .slider { background-color: #007bff; }
     .switch input:checked + .slider:before { transform: translateX(20px); }
   </style>
 </head>
 <body>
+
   <!-- Toolbar -->
   <div id="toolbar">
     <div id="leftButtons">
-      <button style="font-size: 24px;" id="saveBtn" title="Save"><i class="fas fa-save"></i></button>
-      <button style="font-size: 24px;" id="loadBtn" title="Load"><i class="fas fa-folder-open"></i></button>
+      <button id="saveBtn" title="Save" style="font-size:24px;"><i class="fas fa-save"></i></button>
+      <button id="loadBtn" title="Load" style="font-size:24px;"><i class="fas fa-folder-open"></i></button>
     </div>
     <div id="centerButtons">
-      <button style="font-size: 24px;" id="runBtn" title="Run"><i class="fas fa-play"></i></button>
-      <button style="font-size: 24px;" id="buildBtn" title="Build"><i class="fas fa-hammer"></i></button>
+      <button id="runBtn" title="Run" style="font-size:24px;"><i class="fas fa-play"></i></button>
+      <button id="buildBtn" title="Build" style="font-size:24px;"><i class="fas fa-hammer"></i></button>
     </div>
     <div id="rightButtons"></div>
     <input type="file" id="fileInput" style="display:none" accept="application/json">
@@ -388,7 +190,7 @@
     <div id="vSplitterLeft"></div>
     <div id="canvas-container">
       <div id="canvas"></div>
-      <div id="codeHeader">CrossBasic IDE 2025 Release 1 - Beta</div>
+      <div id="codeHeader">CrossBasic IDE 2025 Release 1.2 - Beta</div>
       <div id="editor"></div>
       <div id="zoomControl">
         <input type="text" id="zoomPercent" value="100%" />
@@ -418,55 +220,58 @@
     </div>
   </div>
 
-  <!-- Hidden Resource Menu -->
+  <!-- Resource Menu -->
   <div id="resourceMenu">
     <div data-type="view">View</div>
     <div data-type="module">Module</div>
     <div data-type="class">Class</div>
     <div data-type="asset">Asset</div>
   </div>
-
-  <!-- Hidden file input for Assets -->
   <input type="file" id="assetFileInput" style="display:none" multiple>
 
-  <!-- Project Explorer Context Menu -->
+  <!-- Context Menus, Modals, Status Bar -->
   <div id="projContextMenu"></div>
-
-  <!-- Modal for Viewing Asset Images -->
+  <div id="contextMenu">
+    <div id="cmRemove">Remove</div>
+    <div id="cmDuplicate">Duplicate</div>
+  </div>
   <div id="assetModal">
     <div id="assetModalContent">
       <span id="assetModalClose">&times;</span>
       <img id="assetModalImage" src="" alt="Asset">
     </div>
   </div>
-
-  <!-- Status Bar -->
   <div id="statusBar">
     <div>Idle...</div>
-    <div id="statusRight">Crossbasic IDE 2025 Release 1 - Beta</div>
-  </div>
-
-  <!-- Context Menu for Canvas Controls -->
-  <div id="contextMenu">
-    <div id="cmRemove">Remove</div>
-    <div id="cmDuplicate">Duplicate</div>
+    <div id="statusRight">CrossBasic IDE 2025 Release 1.2 - Beta</div>
   </div>
 
   <script>
-    /********** Globals & Helpers **********/
+    // Globals & Helpers
+    let bulkLoading = false;
+    let appSelected   = false;               // 🚩 true when the root is selected
     let controlCounter = 0,
         selectedControl = null,
         currentViewNode = null,
         currentCodeNode = null,
         zoomLevel = 1;
-    const canvas     = document.getElementById('canvas'),
+    const canvas = document.getElementById('canvas'),
           toolboxBtn = document.querySelector('button[data-tab="toolboxTab"]'),
           propBtn    = document.querySelector('button[data-tab="propTab"]'),
           treeView   = document.getElementById('treeView'),
-          zoomCtrl   = document.getElementById('zoomControl');
+          zoomCtrl   = document.getElementById('zoomControl'),
+          editor     = document.getElementById('editor');
     let defaultControls = {};
-    let projectTree = { name: "Application", type: "application", children: [] };
-    const groupOrder = ["Constants","Methods","Properties","Enumerations"];
+    let projectTree = { 
+      name: "Application", 
+      type: "application", 
+      // 👉 stores the two new properties
+      properties: {
+      defaultView: "",
+      menuBar: ""
+      },
+      children: [] };
+    const groupOrder = ["Constants","Controls","Methods","Properties","Enumerations","Event Handlers"];
 
     function rgbToHex(rgb) {
       const nums = rgb.match(/\d+/g);
@@ -527,7 +332,7 @@
       }
     }
 
-    /********** Ace Editor Setup **********/
+    // Ace Editor Setup
     var codeEditor = ace.edit("editor");
     codeEditor.setTheme("ace/theme/merbivore_soft");
     codeEditor.session.setMode("ace/mode/vbscript");
@@ -539,7 +344,9 @@
       fontSize: "12pt",
       fontFamily: "Fira Code"
     });
-    
+    codeEditor.session.on('change', function() {
+      if (currentCodeNode) currentCodeNode.content = codeEditor.getValue();
+    });
 
     function updateEditorSize() {
       if (editor.style.display!=="none") {
@@ -551,56 +358,106 @@
     }
     window.addEventListener("resize", updateEditorSize);
 
-    /********** Save & Utilities **********/
+    // Save & Utilities
     function saveCurrentView() {
       if(!currentViewNode) return;
+      // ➊ take a snapshot **before** we replace the array
+      let previousControls = currentViewNode.controls || [];
+
+      const dispW = parseInt(canvas.style.width) || 0;
+      const dispH = parseInt(canvas.style.height) || 0;
       currentViewNode.designer = {
         name: currentViewNode.name,
-        width: parseInt(canvas.style.width),
-        height: parseInt(canvas.style.height),
-        backgroundColor: canvas.style.backgroundColor
+        width: dispW - 2,
+        height: dispH - 2,
+        backgroundColor: rgbToHex(canvas.style.backgroundColor),
+        viewType: currentViewNode.designer?.viewType ?? currentViewNode.viewType ?? 0,
+        hasCloseButton:      currentViewNode.designer?.hasCloseButton      ?? true,
+        hasMinimizeButton:   currentViewNode.designer?.hasMinimizeButton   ?? true,
+        hasMaximizeButton:   currentViewNode.designer?.hasMaximizeButton   ?? true,
+        hasFullScreenButton: currentViewNode.designer?.hasFullScreenButton ?? false,
+        hasTitleBar:         currentViewNode.designer?.hasTitleBar         ?? true,
+        resizable:           currentViewNode.designer?.resizable           ?? true
       };
       currentViewNode.controls = [];
       canvas.querySelectorAll('.ui-control').forEach(c=>{
         let dyn={};
-        Array.from(c.attributes).forEach(a=>{ if(a.name.startsWith("data-")) dyn[a.name.slice(5)] = a.value; });
-        currentViewNode.controls.push({
-          id: c.getAttribute("data-id"),
-          left: c.style.left,
-          top:  c.style.top,
-          width:c.style.width,
-          height:c.style.height,
-          dynamic: dyn
-        });
+          Array.from(c.attributes).forEach(a=>{
+          if(!a.name.startsWith("data-")) return;
+            const key = a.name.slice(5);
+            if (key === "_events") return;        // <-- never copy the bogus string
+            dyn[key] = a.value;
+           });
+
+          // --- FIXED: keep event-code alive in saved JSON -----------------------------
+             // only search when we have something to search
+            let oldCtl = previousControls.length
+            ? previousControls.find(pc => pc.id === c.getAttribute('data-id'))
+            : undefined;
+
+            if (oldCtl && oldCtl.dynamic && Array.isArray(oldCtl.dynamic._events)) {
+              dyn._events = oldCtl.dynamic._events;   // keep the live reference
+            } else {
+              dyn._events = [];
+            }
+          // -------------------------------------------------------------------------
+
+          currentViewNode.controls.push({
+            id: c.getAttribute("data-id"),
+            left: c.style.left,
+            top:  c.style.top,
+            width:c.style.width,
+            height:c.style.height,
+            dynamic: dyn
+          });
       });
+
+      //  Now that we’ve finished rebuilding the array, capture it
+      //previousControls = currentViewNode.controls;
+
     }
 
     function updateProperty(key,value,context) {
       if(context==="control" && selectedControl) {
-        if(["x","y","w","h"].includes(key)) {
-          if(key==="x") selectedControl.style.left = value+"px";
-          if(key==="y") selectedControl.style.top  = value+"px";
-          if(key==="w") selectedControl.style.width= value+"px";
-          if(key==="h") selectedControl.style.height=value+"px";
+        if(["left","top","width","height"].includes(key)) {
+          if(key==="left")   selectedControl.style.left   = value+"px";
+          if(key==="top")    selectedControl.style.top    = value+"px";
+          if(key==="width")  selectedControl.style.width  = value+"px";
+          if(key==="height") selectedControl.style.height = value+"px";
         } else {
-          selectedControl.setAttribute("data-"+key, value);
+        //   selectedControl.setAttribute("data-"+key, value);
+        // }
+        // arrays → JSON; everything else stays plain
+        if (Array.isArray(value))
+          selectedControl.setAttribute("data-"+key, JSON.stringify(value));
+        else selectedControl.setAttribute("data-"+key, value);
         }
         const def = defaultControls[selectedControl.getAttribute("data-type")];
         if(def?.drawFunc) {
           const p = getControlProperties(selectedControl),
                 cc = selectedControl.querySelector('.control-draw-canvas'),
                 ctx=cc.getContext('2d');
-          cc.width=p.w; cc.height=p.h;
+          cc.width = p.width; cc.height = p.height;
           ctx.clearRect(0,0,cc.width,cc.height);
           try{ def.drawFunc(ctx,p); }catch{}
         }
         saveCurrentView();
       }
       else if(context==="designer" && currentViewNode) {
-        if(key==="width")  { canvas.style.width=value+"px";  currentViewNode.designer.width=parseInt(value); }
-        if(key==="height") { canvas.style.height=value+"px"; currentViewNode.designer.height=parseInt(value); }
+        if(key==="width")  {
+          canvas.style.width = (parseInt(value) + 2) + "px";
+          currentViewNode.designer.width = parseInt(value);
+        }
+        if(key==="height") {
+          canvas.style.height = (parseInt(value) + 2) + "px";
+          currentViewNode.designer.height = parseInt(value);
+        }
         if(key==="backgroundColor") { canvas.style.backgroundColor=value; currentViewNode.designer.backgroundColor=value; }
+        if(key==="viewType") { currentViewNode.viewType=value; currentViewNode.designer.viewType=value; }
         if(key==="name") { currentViewNode.name=value; currentViewNode.designer.name=value; }
+        if (["hasCloseButton","hasMinimizeButton","hasMaximizeButton","hasFullScreenButton","hasTitleBar","resizable"].includes(key)) {
+          currentViewNode.designer[key] = value;
+        }
         saveCurrentView();
       }
       else if(context==="code" && currentCodeNode) {
@@ -615,20 +472,27 @@
     }
 
     function updateTabsAndZoom() {
-      if(currentViewNode) {
-        toolboxBtn.disabled=false;
-        zoomCtrl.style.display='flex';
-        treeView.style.display='block';
+      if(appSelected){
+          toolboxBtn.disabled=true;
+          zoomCtrl.style.display='none';
+          treeView.style.display='none';
+          propBtn.click();
+          return;
+        }
+      if (currentViewNode) {
+        toolboxBtn.disabled = false;
+        zoomCtrl.style.display = 'flex';
+        treeView.style.display   = 'block';
       } else {
-        toolboxBtn.disabled=true;
-        zoomCtrl.style.display='none';
-        treeView.style.display='none';
+        toolboxBtn.disabled = true;
+        zoomCtrl.style.display = 'none';
+        treeView.style.display   = 'none';
+        propBtn.click();
       }
-      propBtn.click();
     }
 
     function getControlProperties(c) {
-      const r={ x:parseInt(c.style.left), y:parseInt(c.style.top), w:parseInt(c.style.width), h:parseInt(c.style.height) };
+      const r={ left:parseInt(c.style.left), top:parseInt(c.style.top), width:parseInt(c.style.width), height:parseInt(c.style.height) };
       Array.from(c.attributes).forEach(a=>{
         if(a.name.startsWith("data-")) {
           let k=a.name.slice(5), v=a.value;
@@ -650,7 +514,7 @@
       const p = getControlProperties(c),
             cc = c.querySelector('.control-draw-canvas'),
             ctx=cc.getContext('2d');
-      cc.width=p.w; cc.height=p.h;
+      cc.width = p.width; cc.height = p.height;
       ctx.clearRect(0,0,cc.width,cc.height);
       try{ def.drawFunc(ctx,p); }catch{}
     }
@@ -694,7 +558,7 @@
       hdr.textContent = txt;
     }
 
-    /********** Zoom Controls **********/
+    // Zoom Controls
     function applyZoom(){ canvas.style.transform=`scale(${zoomLevel})`; }
     function updateZoomDisplay(){ document.getElementById('zoomPercent').value=Math.round(zoomLevel*100)+"%"; }
     document.getElementById('zoomIn').addEventListener('click',()=>{
@@ -713,24 +577,147 @@
     });
     zp.addEventListener('keydown',e=>{ if(e.key==="Enter") zp.blur(); });
 
-    /********** Render Project Tree **********/
-    function renderProjectTree() {
+    // Render Project Tree
+    function renderProjectTree(){
       const ex = document.getElementById('explorerList');
       ex.innerHTML = "";
-      function walk(node, parentGroup) {
+      function walk(node,parentGroup){
+        let childNodes = [];
+
+          /* ----------  special handling for VIEW nodes  ---------- */
+          if (node.type === "view") {
+            // Any groups that ALREADY belong to this view.
+            // If none, attach a fresh array so we keep what we add next.
+            const existing = node.children || [];
+            if (!node.children) node.children = existing;
+
+            const constantsGroup  = existing.find(g => g.groupName === "Constants");
+            const methodsGroup    = existing.find(g => g.groupName === "Methods");
+            const propsGroup      = existing.find(g => g.groupName === "Properties");
+            const enumsGroup      = existing.find(g => g.groupName === "Enumerations");
+
+            /* -------- Controls group (remember collapsed state) ---------- */
+            const oldControlsGrp  = existing.find(g => g.groupName === "Controls");
+            const controlsGroup   = {
+              name      : "Controls",
+              type      : "group",
+              groupName : "Controls",
+              collapsed : oldControlsGrp ? oldControlsGrp.collapsed : false,
+              children  : []
+            };
+
+            /* ---- one subgroup per control on the designer canvas ------- */
+            (node.controls || []).forEach(ctrl => {
+
+              /* keep the old subgroup’s collapsed flag, if it existed */
+              const oldSub = oldControlsGrp?.children
+                            ?.find(c => c.groupName === ctrl.dynamic.name);
+
+              const cg = {
+                name      : ctrl.dynamic.name,
+                type      : "group",
+                groupName : ctrl.dynamic.name,
+                collapsed : oldSub ? oldSub.collapsed : false,
+                children  : []
+              };
+
+              /* Build (or revive) the event-handler method stubs */
+              const def = defaultControls[ctrl.dynamic.type];
+              (def.eventHandlers || []).forEach(ev => {
+                let evObj = ctrl.dynamic._events.find(e => e.eventName === ev.eventName);
+
+                if (!evObj) {
+                  evObj = {
+                    name       : ev.eventName,
+                    eventName  : ev.eventName,
+                    type       : "code",
+                    codeType   : "Methods",
+                    scope      : "Public",
+                    parameters : ev.parameters,
+                    returnType : ev.returnType,
+                    content    : "",
+                    isEvent    : true
+                  };
+                  ctrl.dynamic._events.push(evObj);
+                }
+                cg.children.push(evObj);
+              });
+
+              controlsGroup.children.push(cg);
+              // persist the group
+              if (oldControlsGrp) {
+                oldControlsGrp.collapsed = controlsGroup.collapsed;
+                oldControlsGrp.children  = controlsGroup.children;
+              } else {
+                existing.push(controlsGroup);
+              }
+            });
+
+
+            /* -------- Event-Handlers group (after Enumerations) ------------------ */
+            const oldEventsGrp   = existing.find(g => g.groupName === "Event Handlers");
+
+              const eventHandlersGroup = {
+                name      : "Event Handlers",
+                type      : "group",
+                groupName : "Event Handlers",
+                collapsed : oldEventsGrp ? oldEventsGrp.collapsed : false,
+                children  : []
+              };
+
+              // Ensure the two standard view-level events exist and persist
+              ["Opening","Closing"].forEach(evName => {
+                let evNode = oldEventsGrp?.children?.find(c => c.name === evName);
+
+                if (!evNode) {          // first time – create a fresh node
+                  evNode = {
+                    name       : evName,
+                    type       : "code",
+                    codeType   : "Methods",   // regular method stub
+                    scope      : "Public",
+                    parameters : "",
+                    returnType : "",
+                    content    : "",
+                    isEvent    : true
+                  };
+                }
+
+                eventHandlersGroup.children.push(evNode);
+
+              });
+              
+              if (oldEventsGrp) {
+                oldEventsGrp.collapsed = eventHandlersGroup.collapsed;
+                oldEventsGrp.children  = eventHandlersGroup.children;
+              } else {
+                existing.push(eventHandlersGroup);
+              };
+
+
+            /* push groups back in DISPLAY order -------------------------------- */
+            [constantsGroup, controlsGroup, methodsGroup, propsGroup, enumsGroup, eventHandlersGroup]
+              .forEach(g => { if (g) childNodes.push(g); });
+
+          } else {
+            /* every other node type -------------------------------------------- */
+            childNodes = node.children || [];
+          }
+
         const li = document.createElement('li'),
               hd = document.createElement('div');
+        li.dataset.type = node.type;
         hd.className = "tree-item-header";
 
-        // toggle for collapsible
-        if(node.children?.length && ["module","class","asset","group","view"].includes(node.type)) {
+        if(childNodes.length && ["view","module","class","asset","group"].includes(node.type)){
           const tog = document.createElement('span');
           tog.textContent = node.collapsed ? "►" : "▼";
           tog.style.cursor="pointer";
           tog.style.userSelect="none";
           tog.style.fontSize="12px";
-          tog.addEventListener('click', e=>{
-            e.stopPropagation(); node.collapsed=!node.collapsed; renderProjectTree();
+          tog.addEventListener('click',e=>{
+            e.stopPropagation();
+            node.collapsed = !node.collapsed;
+            renderProjectTree();
           });
           hd.append(tog);
         }
@@ -744,17 +731,22 @@
           case "asset":       img.src="/icons/Folder48.png"; break;
           case "file":        img.src="/icons/Asset48.png"; break;
           case "group":
-            if(node.groupName==="Constants")    img.src="/icons/Constant48.png";
-            else if(node.groupName==="Methods") img.src="/icons/Method48.png";
-            else if(node.groupName==="Properties") img.src="/icons/Property48.png";
-            else if(node.groupName==="Enumerations") img.src="/icons/Enum48.png";
+            if(node.groupName==="Constants")      img.src="/icons/Constant48.png";
+            else if(node.groupName==="Controls")  img.src="/icons/Controls48.png";
+            else if(node.groupName==="Methods")   img.src="/icons/Method48.png";
+            else if(node.groupName==="Properties")img.src="/icons/Property48.png";
+            else if(node.groupName==="Enumerations")img.src="/icons/Enum48.png";
+            else if(node.groupName==="Event Handlers") img.src="/icons/Events48.png";
+            else                                  img.src="/icons/Control48.png";
             break;
           case "code":
-            if(parentGroup==="Constants")    img.src="/icons/Constant48.png";
-            else if(parentGroup==="Methods") img.src="/icons/Method48.png";
-            else if(parentGroup==="Properties") img.src="/icons/Property48.png";
-            else if(parentGroup==="Enumerations") img.src="/icons/Enum48.png";
-            else img.src="/icons/Asset48.png";
+            if(node.isEvent)                     img.src="/icons/Events48.png";
+            else if(parentGroup==="Constants")   img.src="/icons/Constant48.png";
+            else if(parentGroup==="Controls")    img.src="/icons/Control48.png";
+            else if(parentGroup==="Methods")     img.src="/icons/Method48.png";
+            else if(parentGroup==="Properties")  img.src="/icons/Property48.png";
+            else if(parentGroup==="Enumerations")img.src="/icons/Enum48.png";
+            else                                  img.src="/icons/Asset48.png";
             break;
         }
         img.style.width = img.style.height = "16px";
@@ -762,61 +754,129 @@
 
         const sp = document.createElement('span');
         sp.textContent = node.name;
-        if(node.type==="code") {
-          sp.style.color = (node.scope==="Private" ? "red" : "#fff");
-        }
+        if(node.type==="code" && node.scope==="Private") sp.style.color="red";
         hd.append(sp);
 
         li.append(hd);
-
         li.addEventListener("click", e=>{
           e.stopPropagation();
           document.querySelectorAll('#explorerList li').forEach(x=>x.classList.remove('selected-tree'));
           li.classList.add('selected-tree');
-          if(node.type==="view") loadView(node);
-          else loadCodeEditor(node);
+
+          /* ── APP node ───────────────────────────── */
+          appSelected = (node.type === "application");
+          if (appSelected) {
+            saveCurrentView();                // persist any open view
+            currentViewNode = null;
+            currentCodeNode = null;
+            canvas.style.display  = "none";
+            editor.style.display  = "none";
+            renderPropertiesPanel();
+            updateTabsAndZoom();
+            return;
+          }
+
+          /* ── VIEW  ──────────────────────────────── */
+          if (node.type === "view") {
+            loadView(node);
+            return;
+          }
+
+          /* ── MODULE / CLASS  (root rows) ────────── */
+          if ((node.type === "module" || node.type === "class") && !node.codeType) {
+            /* close whatever was open */
+            if (currentCodeNode) currentCodeNode.content = codeEditor.getValue();
+            saveCurrentView();
+
+            currentViewNode  = null;
+            currentCodeNode  = node;          // ← this makes the Name textbox show up
+            canvas.style.display = "none";
+            editor.style.display = "none";
+
+            renderPropertiesPanel();
+            updateCodeHeader();
+            updateTabsAndZoom();
+            return;
+          }
+
+          /* ── CODE (methods / constants / …) ─────── */
+          if (node.type === "code") {
+            loadCodeEditor(node);
+            return;
+          }
         });
+
+
         li.addEventListener("contextmenu", e=>{
-          e.preventDefault(); e.stopPropagation();
+          if(node.type==="application") return; // swallow right‑click
+          e.preventDefault();
+          e.stopPropagation();
           showProjContextMenu(e,node,li);
         });
 
-        if((node.type==="view"&&currentViewNode===node)||
-           ((["module","class","code"].includes(node.type))&&currentCodeNode===node)) {
-          li.classList.add('selected-tree');
-        }
+        if(node===currentViewNode && node.type==="view") li.classList.add('selected-tree');
+        if(node===currentCodeNode && node.type==="code") li.classList.add('selected-tree');
 
-        if(node.children?.length && !node.collapsed) {
-          const ul = document.createElement('ul'),
-                ng = (node.type==="group"?node.groupName:parentGroup);
-          node.children.forEach(c=>ul.appendChild(walk(c,ng)));
+        if(childNodes.length && !node.collapsed){
+          const ul = document.createElement('ul');
+          childNodes.forEach(c=> ul.appendChild(walk(c, c.type==="group"?c.groupName:parentGroup) ));
           li.append(ul);
         }
 
         return li;
       }
+
       ex.append(walk(projectTree,null));
       updateTabsAndZoom();
     }
 
-    /********** Project Context Menu **********/
-    function showProjContextMenu(e,node,li) {
+    // Project Context Menu
+    function showProjContextMenu(e,node,li){
       const m = document.getElementById('projContextMenu');
       m.innerHTML = "";
-      if(node.type==="file"){
+      if(node.type==="view"){
+        const map={"Constant":"Constants","Method":"Methods","Property":"Properties","Enumeration":"Enumerations"};
+        ["Constant","Method","Property","Enumeration"].forEach(s=>{
+          const g=map[s];
+          const d=document.createElement('div');
+          d.textContent="Add "+s;
+          d.addEventListener('click',ev=>{
+            ev.stopPropagation();
+            hideProjContextMenu();
+            addSubNode(node,g,"Untitled");
+          });
+          m.append(d);
+        });
+        const del = document.createElement('div');
+        del.textContent = "Delete View";
+        del.addEventListener('click',ev=>{
+          ev.stopPropagation();
+          hideProjContextMenu();
+          if(confirm("Delete this view and all its content?")){
+            deleteNode(node);
+            codeEditor.setValue("");
+            document.getElementById('propPanel').innerHTML="";
+            canvas.innerHTML="";
+          }
+        });
+        m.append(del);
+      }
+      else if(node.type==="file"){
         const va = document.createElement('div');
-        va.textContent="View Asset";
+        va.textContent = "View Asset";
         va.addEventListener('click',ev=>{
-          ev.stopPropagation(); hideProjContextMenu();
+          ev.stopPropagation();
+          hideProjContextMenu();
           const ln=node.name.toLowerCase();
           if(ln.match(/\.(png|jpe?g|gif|webp)$/)) showAssetModal(node);
           else alert("Cannot view this asset type.");
         });
         m.append(va);
         const da = document.createElement('div');
-        da.textContent="Delete Asset";
+        da.textContent = "Delete Asset";
         da.addEventListener('click',ev=>{
-          ev.stopPropagation(); hideProjContextMenu();
+          ev.stopPropagation();
+          hideProjContextMenu();
           deleteAssetNode(node);
           codeEditor.setValue("");
           document.getElementById('propPanel').innerHTML="";
@@ -827,18 +887,20 @@
         const map={"Constant":"Constants","Method":"Methods","Property":"Properties","Enumeration":"Enumerations"};
         ["Constant","Method","Property","Enumeration"].forEach(s=>{
           const g=map[s];
-          const d = document.createElement('div');
+          const d=document.createElement('div');
           d.textContent="Add "+s;
           d.addEventListener('click',ev=>{
-            ev.stopPropagation(); hideProjContextMenu();
+            ev.stopPropagation();
+            hideProjContextMenu();
             addSubNode(node,g,"Untitled");
           });
           m.append(d);
         });
-        const del = document.createElement('div');
-        del.textContent=node.type==="module"?"Delete Module":"Delete Class";
+        const del=document.createElement('div');
+        del.textContent = node.type==="module"?"Delete Module":"Delete Class";
         del.addEventListener('click',ev=>{
-          ev.stopPropagation(); hideProjContextMenu();
+          ev.stopPropagation();
+          hideProjContextMenu();
           if(confirm(`Delete this ${node.type} and all its content?`)){
             deleteNode(node);
             codeEditor.setValue("");
@@ -849,10 +911,11 @@
         m.append(del);
       }
       else if(node.type==="group"){
-        const da = document.createElement('div');
+        const da=document.createElement('div');
         da.textContent="Delete All";
         da.addEventListener('click',ev=>{
-          ev.stopPropagation(); hideProjContextMenu();
+          ev.stopPropagation();
+          hideProjContextMenu();
           if(confirm(`Delete ${node.name} and all its content?`)){
             deleteGroupNode(node);
           }
@@ -860,38 +923,41 @@
         m.append(da);
       }
       else if(node.type==="code"){
-        const dc = document.createElement('div');
+        const dc=document.createElement('div');
         dc.textContent="Delete";
         dc.addEventListener('click',ev=>{
-          ev.stopPropagation(); hideProjContextMenu();
+          ev.stopPropagation();
+          hideProjContextMenu();
           deleteCodeNode(node);
           codeEditor.setValue("");
           document.getElementById('propPanel').innerHTML="";
         });
         m.append(dc);
       }
-
       m.style.left = e.pageX+"px";
-      m.style.top  = e.pageY+"px";
-      m.style.display = "block";
-      document.addEventListener('click', hideProjContextMenu);
+      m.style.top = e.pageY+"px";
+      m.style.display="block";
+      document.addEventListener('click',hideProjContextMenu);
     }
-    function hideProjContextMenu() {
+    function hideProjContextMenu(){
       const m=document.getElementById('projContextMenu');
-      m.style.display="none"; m.innerHTML="";
-      document.removeEventListener('click', hideProjContextMenu);
+      m.style.display="none";
+      m.innerHTML="";
+      document.removeEventListener('click',hideProjContextMenu);
     }
 
-    /********** Asset Modal **********/
+    // Asset Modal
     function showAssetModal(node){
       const modal=document.getElementById('assetModal'),
             img=document.getElementById('assetModalImage');
-      if(node.fileUrl){ img.src=node.fileUrl; modal.style.display="flex"; }
-      else alert("No image URL provided.");
+      if(node.fileUrl){
+        img.src=node.fileUrl;
+        modal.style.display="flex";
+      } else alert("No image URL provided.");
     }
     document.getElementById('assetModalClose').addEventListener('click',()=>document.getElementById('assetModal').style.display="none");
 
-    /********** Delete Helpers **********/
+    // Delete Helpers
     function deleteAssetNode(an){
       const ai=projectTree.children.findIndex(n=>n.type==="asset");
       if(ai>-1){
@@ -932,7 +998,7 @@
       renderProjectTree();
     }
 
-    /********** Add Subnode **********/
+    // Add Subnode
     function addSubNode(parent, groupName, childName){
       if(!parent.children) parent.children=[];
       let g=parent.children.find(c=>c.type==="group"&&c.groupName===groupName);
@@ -950,52 +1016,75 @@
       const cn={ name:"Untitled",type:"code",content:"",codeType:groupName };
       if(groupName==="Constants"){ cn.defaultValue=""; cn.typeProp="Integer"; cn.scope="Public"; }
       if(groupName==="Methods")    { cn.parameters=""; cn.returnType=""; cn.scope="Public"; }
-      if(groupName==="Properties"){ cn.propertyType=""; cn.defaultVal=""; cn.scope="Public"; }
+      if(groupName==="Properties") { cn.propertyType=""; cn.defaultVal=""; cn.scope="Public"; }
       if(groupName==="Enumerations"){ cn.values=""; cn.scope="Public"; }
       g.children.push(cn);
       renderProjectTree();
     }
 
-    /********** Load View **********/
+    // Load View
     function loadView(viewNode){
+      if(currentCodeNode) currentCodeNode.content = codeEditor.getValue();
       saveCurrentView();
       currentViewNode=viewNode;
       currentCodeNode=null;
-      document.getElementById('editor').style.display="none";
+      editor.style.display="none";
       canvas.style.display="block";
       const d=viewNode.designer||{};
-      canvas.style.width  = (d.width||375)+"px";
-      canvas.style.height = (d.height||667)+"px";
-      canvas.style.backgroundColor = d.backgroundColor||"#ffffff";
+      d.hasCloseButton      = (d.hasCloseButton!==undefined)?d.hasCloseButton:true;
+      d.hasMinimizeButton   = (d.hasMinimizeButton!==undefined)?d.hasMinimizeButton:true;
+      d.hasMaximizeButton   = (d.hasMaximizeButton!==undefined)?d.hasMaximizeButton:true;
+      d.hasFullScreenButton = (d.hasFullScreenButton!==undefined)?d.hasFullScreenButton:false;
+      d.hasTitleBar         = (d.hasTitleBar!==undefined)?d.hasTitleBar:true;
+      d.resizable           = (d.resizable!==undefined)?d.resizable:true;
+      canvas.style.width  = ((d.width  || 375) + 2) + "px";
+      canvas.style.height = ((d.height || 667) + 2) + "px";
+      
+      const bgHex = (typeof d.backgroundColor === "string" && d.backgroundColor.startsWith("rgb"))
+               ? rgbToHex(d.backgroundColor)
+               : (d.backgroundColor || "#ffffff");
+      canvas.style.backgroundColor = bgHex;
       canvas.innerHTML="";
-      (viewNode.controls||[]).forEach(item=>{
+     
+      bulkLoading = true;                         // 🚩 start bulk load
+      (viewNode.controls || []).forEach(item => {
         const type=item.dynamic.type,
               defArr=defaultControls[type]?.default||[],
               defs=convertDefaults(defArr),
               ctrl=createControl(type,Object.assign({},defs,{
                 name:item.dynamic.name,
                 text:item.dynamic.text,
-                x: parseInt(item.left),
-                y: parseInt(item.top),
-                w: parseInt(item.width),
-                h: parseInt(item.height)
+                left: parseInt(item.left),
+                top:  parseInt(item.top),
+                width:parseInt(item.width),
+                height:parseInt(item.height)
               }));
-        Object.entries(item.dynamic).forEach(([k,v])=>ctrl.setAttribute("data-"+k,v));
+        
+        // ‼️ never push the _events array into a DOM attribute (it becomes a string)
+        Object.entries(item.dynamic).forEach(([k,v])=>{
+          if (k === "_events") return;          // <-- skip it
+          ctrl.setAttribute("data-"+k, v);
+        });
         updateControlDraw(ctrl);
       });
+
+      bulkLoading = false;                        // 🚩 done
+
       renderPropertiesPanel();
       updateCodeHeader();
+      saveCurrentView();
       renderProjectTree();
+      toolboxBtn.disabled=false;
     }
 
-    /********** Load Code Editor **********/
+    // Load Code Editor
     function loadCodeEditor(node){
-      if(currentCodeNode) currentCodeNode.content = codeEditor.getValue();
-      saveCurrentView();
-      currentViewNode=null;
+      if (currentCodeNode) currentCodeNode.content = codeEditor.getValue();
+      if (currentViewNode) saveCurrentView();       // only persist an open view
+      currentViewNode = null;
       currentCodeNode=node;
       canvas.style.display="none";
-      document.getElementById('editor').style.display="block";
+      editor.style.display="block";
       updateEditorSize();
       codeEditor.setValue(node.content||"", -1);
       renderPropertiesPanel();
@@ -1003,7 +1092,7 @@
       renderProjectTree();
     }
 
-    /********** Control Selection & Context Menu **********/
+    // Control Selection & Context Menu
     function selectControl(c){
       if(selectedControl && selectedControl!==c){
         selectedControl.classList.remove("selected");
@@ -1032,7 +1121,7 @@
     }
     document.addEventListener("click", hideContextMenu);
 
-    /********** Remove & Duplicate Controls **********/
+    // Remove & Duplicate Controls
     function removeControl(c){
       if(c.parentNode===canvas){
         if(selectedControl===c){
@@ -1048,31 +1137,29 @@
       }
     }
     function duplicateControl(c){
-      const x=parseInt(c.style.left)+20,
-            y=parseInt(c.style.top)+20,
-            w=parseInt(c.style.width),
-            h=parseInt(c.style.height),
-            t=c.getAttribute("data-type"),
-            nm=c.getAttribute("data-name"),
-            defArr=defaultControls[t]?.default||[],
-            defs=convertDefaults(defArr),
-            nc=createControl(t,Object.assign({},defs,{ name:nm, text:c.getAttribute("data-text"), x,y,w,h }));
+      const left = parseInt(c.style.left)+20,
+            top  = parseInt(c.style.top)+20,
+            t = c.getAttribute("data-type"),
+            nm= c.getAttribute("data-name"),
+            defArr= defaultControls[t]?.default||[],
+            defs= convertDefaults(defArr),
+            nc= createControl(t,Object.assign({},defs,{ name:nm, text:c.getAttribute("data-text"), left, top, width:parseInt(c.style.width), height:parseInt(c.style.height) }));
       selectControl(nc);
     }
 
-    /********** Drag & Resize **********/
+    // Drag & Resize
     function initInteract(el){
       interact(el)
-        .draggable({ ignoreFrom:".resize-handle", listeners:{ start:dragStartListener, move:dragMoveListener } })
-        .resizable({
-          allowFrom:".resize-handle",
-          edges:{ top:true,left:true,bottom:true,right:true },
-          modifiers:[
-            interact.modifiers.restrictEdges({ outer:canvas }),
-            interact.modifiers.restrictSize({ min:{ width:30, height:30 } })
-          ],
-          listeners:{ move:resizeMoveListener }
-        });
+      .draggable({ ignoreFrom:".resize-handle", listeners:{ start:dragStartListener, move:dragMoveListener } })
+      .resizable({
+        allowFrom:".resize-handle",
+        edges:{ top:true,left:true,bottom:true,right:true },
+        modifiers:[
+          interact.modifiers.restrictEdges({ outer:canvas }),
+          interact.modifiers.restrictSize({ min:{ width:30, height:30 } })
+        ],
+        listeners:{ move:resizeMoveListener }
+      });
     }
     function dragStartListener(e){
       const c=e.target.closest(".ui-control");
@@ -1107,7 +1194,7 @@
       renderPropertiesPanel(); refreshTree(); updateControlDraw(c); saveCurrentView();
     }
 
-    /********** Resize Handles **********/
+    // Resize Handles
     function showResizeHandles(c){
       hideResizeHandles(c);
       ["n","s","e","w","ne","nw","se","sw"].forEach(pos=>{
@@ -1121,89 +1208,129 @@
       c.querySelectorAll(".resize-handle").forEach(h=>h.remove());
     }
 
-    /********** Properties Panel **********/
-    function renderPropertiesPanel(){
+    // Properties Panel
+    function renderPropertiesPanel() {
       const propPanel = document.getElementById("propPanel");
       propPanel.innerHTML = "";
       const header = document.createElement("h3");
       header.textContent = "Properties";
       propPanel.appendChild(header);
 
-      // Code node branch
-      if(currentCodeNode){
+      /**** ROOT "APPLICATION" SELECTED ****/
+      if(appSelected){
+        // Ensure the object exists
+        if(!projectTree.properties) projectTree.properties={defaultView:"",menuBar:""};
+        const props=projectTree.properties;
+
+        // --- Default View combobox ---
+        const lbl1=document.createElement('label');
+        lbl1.textContent="Default View:";
+        const sel=document.createElement('select');
+        const views=projectTree.children.filter(c=>c.type==='view');
+        // empty option
+        const opt0=document.createElement('option');
+        opt0.value=""; opt0.textContent="(none)";
+        sel.append(opt0);
+        views.forEach(v=>{
+          const o=document.createElement('option');
+          o.value=v.name; o.textContent=v.name;
+          if(v.name===props.defaultView) o.selected=true;
+          sel.append(o);
+        });
+        sel.addEventListener('change',()=>{
+          projectTree.properties.defaultView=sel.value;
+        });
+        lbl1.appendChild(sel);
+        propPanel.appendChild(lbl1);
+
+        // --- Menu Bar textfield ---
+        const lbl2=document.createElement('label');
+        lbl2.textContent="Menu Bar:";
+        const inp=document.createElement('input');
+        inp.type='text';
+        inp.value=props.menuBar||"";
+        inp.addEventListener('blur',()=>{
+          projectTree.properties.menuBar=inp.value;
+        });
+        inp.addEventListener('keydown',e=>{ if(e.key==='Enter') inp.blur(); });
+        lbl2.appendChild(inp);
+        propPanel.appendChild(lbl2);
+        return;           // stop here – nothing else to render
+      }
+
+      if (currentCodeNode) {
         let cfg = {};
-        if((currentCodeNode.type==="module"||currentCodeNode.type==="class")&&!currentCodeNode.codeType){
-          cfg = { name:{ type:"textfield", label:"Name", value:currentCodeNode.name||"Untitled" } };
+        if ((currentCodeNode.type === "module" || currentCodeNode.type === "class") && !currentCodeNode.codeType) {
+          cfg = {
+            name: { type: "textfield", label: "Name", value: currentCodeNode.name || "Untitled" }
+          };
         } else {
-          switch(currentCodeNode.codeType){
+          switch (currentCodeNode.codeType) {
             case "Constants":
               cfg = {
-                constantName:{ type:"textfield", label:"Constant Name", value:currentCodeNode.name||"Untitled" },
-                defaultValue:{ type:"textarea", label:"Default Value", value:currentCodeNode.defaultValue||"" },
-                typeProp:{ type:"combobox", label:"Type", value:currentCodeNode.typeProp||"Integer", options:["Integer","Double","String","Boolean","Color"] },
-                scope:{ type:"combobox", label:"Scope", value:currentCodeNode.scope||"Public", options:["Public","Private"] }
+                constantName: { type: "textfield", label: "Constant Name", value: currentCodeNode.name || "Untitled" },
+                defaultValue: { type: "textarea",  label: "Default Value",  value: currentCodeNode.defaultValue || "" },
+                typeProp:     { type: "combobox",  label: "Type",           value: currentCodeNode.typeProp    || "Integer", options: ["Integer","Double","String","Boolean","Color"] },
+                scope:        { type: "combobox",  label: "Scope",          value: currentCodeNode.scope      || "Public",  options: ["Public","Private"] }
               };
               break;
             case "Methods":
               cfg = {
-                methodName:{ type:"textfield", label:"Method Name", value:currentCodeNode.name||"Untitled" },
-                parameters:{ type:"textarea", label:"Parameters", value:currentCodeNode.parameters||"" },
-                returnType:{ type:"textfield", label:"Return Type", value:currentCodeNode.returnType||"" },
-                scope:{ type:"combobox", label:"Scope", value:currentCodeNode.scope||"Public", options:["Public","Private"] }
+                methodName:  { type: "textfield", label: "Method Name",  value: currentCodeNode.name       || "Untitled" },
+                parameters:  { type: "textarea",  label: "Parameters",   value: currentCodeNode.parameters || ""         },
+                returnType:  { type: "textfield", label: "Return Type",  value: currentCodeNode.returnType || ""         },
+                scope:       { type: "combobox",  label: "Scope",        value: currentCodeNode.scope      || "Public",  options: ["Public","Private"] }
               };
               break;
             case "Properties":
               cfg = {
-                propertyName:{ type:"textfield", label:"Name", value:currentCodeNode.name||"Untitled" },
-                propertyType:{ type:"textfield", label:"Type", value:currentCodeNode.propertyType||"" },
-                defaultVal:{ type:"textfield", label:"Default", value:currentCodeNode.defaultVal||"" },
-                scope:{ type:"combobox", label:"Scope", value:currentCodeNode.scope||"Public", options:["Public","Private"] }
+                propertyName:{ type: "textfield", label: "Name",        value: currentCodeNode.name       || "Untitled" },
+                propertyType:{ type: "textfield", label: "Type",        value: currentCodeNode.propertyType || ""      },
+                defaultVal:  { type: "textfield", label: "Default",     value: currentCodeNode.defaultVal  || ""      },
+                scope:       { type: "combobox",  label: "Scope",       value: currentCodeNode.scope      || "Public",  options: ["Public","Private"] }
               };
               break;
             case "Enumerations":
               cfg = {
-                enumName:{ type:"textfield", label:"Enumeration Name", value:currentCodeNode.name||"Untitled" },
-                values:{ type:"textarea", label:"Values", value:currentCodeNode.values||"" },
-                scope:{ type:"combobox", label:"Scope", value:currentCodeNode.scope||"Public", options:["Public","Private"] }
+                enumName: { type: "textfield", label: "Enumeration Name", value: currentCodeNode.name || "Untitled" },
+                values:   { type: "textarea",  label: "Values",            value: currentCodeNode.values     || ""       },
+                scope:    { type: "combobox",  label: "Scope",             value: currentCodeNode.scope      || "Public",  options: ["Public","Private"] }
               };
               break;
           }
         }
-        Object.entries(cfg).forEach(([key,conf])=>{
+        Object.entries(cfg).forEach(([key, conf]) => {
           const lbl = document.createElement("label");
-          lbl.textContent = conf.label+":";
+          lbl.textContent = conf.label + ":";
           let inp;
-          if(conf.type==="combobox"){
-            inp=document.createElement("select");
-            conf.options.forEach(o=>{
-              const opt=document.createElement("option");
-              opt.value=o; opt.textContent=o;
-              if(o===conf.value) opt.selected=true;
+          if (conf.type === "combobox") {
+            inp = document.createElement("select");
+            conf.options.forEach(o => {
+              const opt = document.createElement("option");
+              opt.value = o; opt.textContent = o;
+              if (o === conf.value) opt.selected = true;
               inp.append(opt);
             });
-          } else if(conf.type==="textarea"){
-            inp=document.createElement("textarea");
-            inp.value=conf.value;
-          } else {
-            inp=document.createElement("input");
-            inp.type="text"; inp.value=conf.value;
           }
-          inp.addEventListener("blur",()=>{
-            currentCodeNode[key]=inp.value;
-            if(["constantName","methodName","propertyName","enumName","name"].includes(key)){
-              currentCodeNode.name=inp.value;
+          else if (conf.type === "textarea") {
+            inp = document.createElement("textarea");
+            inp.value = conf.value;
+          }
+          else {
+            inp = document.createElement("input");
+            inp.type  = "text";
+            inp.value = conf.value;
+          }
+          inp.addEventListener("blur", () => {
+            currentCodeNode[key] = inp.value;
+            if (["constantName","methodName","propertyName","enumName","name"].includes(key)) {
+              currentCodeNode.name = inp.value;
             }
             renderProjectTree();
             updateCodeHeader();
           });
-          inp.addEventListener("keydown",e=>{
-            if(e.key==="Enter"){
-              currentCodeNode[key]=inp.value;
-              if(["constantName","methodName","propertyName","enumName","name"].includes(key)){
-                currentCodeNode.name=inp.value;
-              }
-              renderProjectTree();
-              updateCodeHeader();
+          inp.addEventListener("keydown", e => {
+            if (e.key === "Enter") {
               inp.blur();
             }
           });
@@ -1213,89 +1340,219 @@
         return;
       }
 
-      // Selected control branch
-      if(selectedControl){
-        const defArr = defaultControls[selectedControl.getAttribute("data-type")]?.default||[];
-        const propTypes = getDefaultPropTypes(defArr);
-
-        // x/y/w/h
+      if (selectedControl) {
+        const defArr   = defaultControls[selectedControl.getAttribute("data-type")]?.default || [];
         const coords = {
-          x: parseInt(selectedControl.style.left),
-          y: parseInt(selectedControl.style.top),
-          w: parseInt(selectedControl.style.width),
-          h: parseInt(selectedControl.style.height)
+          left:   parseInt(selectedControl.style.left),
+          top:    parseInt(selectedControl.style.top),
+          width:  parseInt(selectedControl.style.width),
+          height: parseInt(selectedControl.style.height)
         };
-        ["x","y","w","h"].forEach(k=>{
-          const lbl=document.createElement("label");
-          lbl.textContent = k.toUpperCase()+":";
-          const inp=document.createElement("input");
-          inp.type="number"; inp.value=coords[k];
-          inp.addEventListener("blur",()=>updateProperty(k,parseFloat(inp.value),"control"));
-          inp.addEventListener("keydown",e=>{ if(e.key==="Enter") inp.blur(); });
+        ["left","top","width","height"].forEach(k => {
+          const lbl = document.createElement("label");
+          lbl.textContent = k.charAt(0).toUpperCase() + k.slice(1) + ":";
+          const inp = document.createElement("input");
+          inp.type  = "number";
+          inp.value = coords[k];
+          inp.addEventListener("blur",    () => updateProperty(k, parseFloat(inp.value), "control"));
+          inp.addEventListener("keydown", e => { if (e.key === "Enter") inp.blur(); });
           lbl.appendChild(inp);
           propPanel.appendChild(lbl);
         });
 
-        defArr.forEach(def=>{
-          const key=def.key;
-          if(["x","y","w","h"].includes(key)) return;
-          let raw=selectedControl.getAttribute("data-"+key);
-          if(raw===null) raw=def.value;
-          let val=raw;
-          if(def.type==="boolean") val=(raw==="true");
-          if(def.type==="number")  val=parseFloat(raw);
-          if(def.type==="color" && typeof raw==="string"&&raw.startsWith("rgb")) val=rgbToHex(raw);
-          if(def.type==="combobox"&&typeof raw==="string"){
-            try{ val=JSON.parse(raw);}catch{ val=raw.split("\n").map(s=>s.trim()).filter(s=>s);}
+      defArr.forEach(def => {
+          const key = def.key;
+          if (["left","top","width","height"].includes(key)) return;
+
+          // ── fetch + coerce saved value ──────────────────────────────
+          let raw = selectedControl.getAttribute("data-"+key);
+          if (raw === null) raw = def.value;
+
+          let val = raw;
+          if (def.type === "boolean") val = (raw === "true");
+          if (def.type === "number" ) val = parseFloat(raw);
+          if (def.type === "color"  && typeof raw === "string" && raw.startsWith("rgb"))
+              val = rgbToHex(raw);
+
+          /* ---------- SPECIAL CASE: combobox -------------------------
+             If default value is an array   → show a <select>.
+             We store the *index* (integer) of the user’s pick.
+          ---------------------------------------------------------------- */
+          if (def.type === "combobox") {
+            /* try to revive array if it’s stored as JSON */
+            let options = [];
+            if (typeof raw === "string") {
+              try { options = JSON.parse(raw); } catch { /* not an array */ }
+            }
+            if (!Array.isArray(options) || !options.length) {
+              options = Array.isArray(def.value) ? def.value : [];
+            }
+
+            /* build UI */
+            const lbl = document.createElement("label");
+            lbl.textContent = key.charAt(0).toUpperCase() + key.slice(1) + ":";
+
+            const sel = document.createElement("select");
+            options.forEach((o,i)=>{
+              const opt=document.createElement("option");
+              opt.value=i; opt.textContent=o;
+              sel.append(opt);
+            });
+
+            /* pick the saved index (default 0) */
+            let savedIdx = 0;
+            if (raw !== null) {
+              const n = parseInt(raw,10);
+              if (!isNaN(n) && n >= 0 && n < options.length) savedIdx = n;
+            }
+            sel.selectedIndex = savedIdx;
+
+            sel.addEventListener("change", ()=>{
+              /* store only the index */
+              updateProperty(def.key, sel.selectedIndex, "control");
+            });
+
+            lbl.appendChild(sel);
+            propPanel.appendChild(lbl);
+            return;     // skip the generic builder for this property
           }
-          const lbl=document.createElement("label");
-          lbl.textContent = key.charAt(0).toUpperCase()+key.slice(1)+":";
-          const inputEl=getInputElementForType(def.type,val,key);
-          const tgt = inputEl.classList.contains("switch")? inputEl.querySelector("input"): inputEl;
-          tgt.addEventListener("blur",()=>{
-            let nv;
-            if(def.type==="boolean") nv=tgt.checked;
-            else if(def.type==="combobox") nv=inputEl.value.split("\n").map(s=>s.trim()).filter(s=>s);
-            else nv=tgt.value;
-            updateProperty(def.key,nv,"control");
+
+          /* ---------- generic builder for all other types ------------- */
+          if (def.type === "combobox" && typeof raw === "string") {
+            // old “array in a <textarea>” fallback
+            try { val = JSON.parse(raw); }
+            catch { val = raw.split("\n").map(s=>s.trim()).filter(s=>s); }
+          }
+
+          const lbl = document.createElement("label");
+          lbl.textContent = key.charAt(0).toUpperCase() + key.slice(1) + ":";
+
+          const inputEl = getInputElementForType(def.type, val, key);
+          const tgt     = inputEl.classList.contains("switch")
+                        ? inputEl.querySelector("input")
+                        : inputEl;
+
+          // always update on blur for text/number/color/etc
+          tgt.addEventListener("blur", () => {
+            if (def.type !== "boolean") {
+              let nv = def.type === "combobox"
+                        ? inputEl.value.split("\n").map(s=>s.trim()).filter(s=>s)
+                        : tgt.value;
+              updateProperty(def.key, nv, "control");
+            }
           });
-          tgt.addEventListener("keydown",e=>{ if(e.key==="Enter") tgt.blur(); });
+
+          // **and** ALSO listen for change on checkboxes so toggles fire immediately:
+          if (def.type === "boolean") {
+            tgt.addEventListener("change", () => {
+              updateProperty(def.key, tgt.checked, "control");
+            });
+          }
+
+          tgt.addEventListener("keydown", e => { if (e.key === "Enter") tgt.blur(); });
+
           lbl.appendChild(inputEl);
           propPanel.appendChild(lbl);
         });
+
         return;
       }
 
-      // Designer (view) branch
-      const dv = currentViewNode?.designer || { name:"", width:"", height:"", backgroundColor:"#ffffff" };
-      Object.entries(dv).forEach(([k,v])=>{
-        const lbl=document.createElement("label");
-        lbl.textContent = k.charAt(0).toUpperCase()+k.slice(1)+":";
-        const inp = getInputElementForType(k==="backgroundColor"?"color":"textfield", v, k);
-        inp.addEventListener("blur",()=>updateProperty(k,inp.value,"designer"));
-        inp.addEventListener("keydown",e=>{ if(e.key==="Enter") inp.blur(); });
-        lbl.appendChild(inp);
-        propPanel.appendChild(lbl);
+      const dv = currentViewNode?.designer || { name:"", width:"", height:"", backgroundColor:"#ffffff", viewType:0 };
+
+      const nameLbl = document.createElement("label");
+      nameLbl.textContent = "Name:";
+      const nameInp = document.createElement("input");
+      nameInp.type = "text"; nameInp.value = dv.name;
+      nameInp.addEventListener("blur",    () => updateProperty("name", nameInp.value, "designer"));
+      nameInp.addEventListener("change",  () => updateProperty("name", nameInp.value, "designer"));
+      nameInp.addEventListener("keydown", e => { if (e.key==="Enter") nameInp.blur(); });
+      nameLbl.appendChild(nameInp);
+      propPanel.appendChild(nameLbl);
+
+      const widthLbl = document.createElement("label");
+      widthLbl.textContent = "Width:";
+      const widthInp = document.createElement("input");
+      widthInp.type = "number"; widthInp.value = dv.width;
+      widthInp.addEventListener("blur",    () => updateProperty("width", parseInt(widthInp.value), "designer"));
+      widthInp.addEventListener("change",  () => updateProperty("width", parseInt(widthInp.value), "designer"));
+      widthInp.addEventListener("keydown", e => { if (e.key==="Enter") widthInp.blur(); });
+      widthLbl.appendChild(widthInp);
+      propPanel.appendChild(widthLbl);
+
+      const heightLbl = document.createElement("label");
+      heightLbl.textContent = "Height:";
+      const heightInp = document.createElement("input");
+      heightInp.type = "number"; heightInp.value = dv.height;
+      heightInp.addEventListener("blur",    () => updateProperty("height", parseInt(heightInp.value), "designer"));
+      heightInp.addEventListener("change",  () => updateProperty("height", parseInt(heightInp.value), "designer"));
+      heightInp.addEventListener("keydown", e => { if (e.key==="Enter") heightInp.blur(); });
+      heightLbl.appendChild(heightInp);
+      propPanel.appendChild(heightLbl);
+
+      const bgLbl = document.createElement("label");
+      bgLbl.textContent = "BackgroundColor:";
+      const bgInp = document.createElement("input");
+      bgInp.type = "color"; 
+
+      //if dv.backgroundColor is rgb(...), convert it first
+      let bgVal  = dv.backgroundColor || "#ffffff";
+      if (typeof bgVal === "string" && bgVal.startsWith("rgb")) {
+          bgVal = rgbToHex(bgVal);
+      }
+      bgInp.value = bgVal;
+      bgInp.addEventListener("blur", () => updateProperty("backgroundColor", bgInp.value, "designer"));
+      bgLbl.appendChild(bgInp);
+      propPanel.appendChild(bgLbl);
+
+      const vtLbl = document.createElement("label");
+      vtLbl.textContent = "ViewType:";
+      const sel = document.createElement("select");
+      ["Normal","Movable Modal","Modal Dialog","Floating Window","Plain Box","Shadow Box"].forEach((t,i)=>{
+        const opt = document.createElement("option");
+        opt.value=i; opt.textContent=t;
+        if(i===dv.viewType) opt.selected=true;
+        sel.appendChild(opt);
+      });
+      sel.addEventListener("change", () => updateProperty("viewType", parseInt(sel.value), "designer"));
+      vtLbl.appendChild(sel);
+      propPanel.appendChild(vtLbl);
+
+      [
+        ["hasCloseButton","Has Close Button"],
+        ["hasMinimizeButton","Has Minimize Button"],
+        ["hasMaximizeButton","Has Maximize Button"],
+        ["hasFullScreenButton","Has Full-Screen Button"],
+        ["hasTitleBar","Has Title Bar"],
+        ["resizable","Resizable"]
+      ].forEach(([key,labelText])=>{
+        const l2 = document.createElement("label");
+        l2.textContent = labelText + ":";
+        const sw = getInputElementForType("boolean", dv[key], key);
+        const chk = sw.querySelector("input");
+        chk.addEventListener("change", e => updateProperty(key, e.target.checked, "designer"));
+        l2.appendChild(sw);
+        propPanel.appendChild(l2);
       });
     }
 
-    /********** View Controls Tree **********/
+    // View Controls Tree
     function refreshTree(){
-      const tl=document.getElementById("treeList");
-      tl.innerHTML="";
-      const ctrls=Array.from(canvas.querySelectorAll(".ui-control"));
+      const tl = document.getElementById("treeList");
+      tl.innerHTML = "";
+      const ctrls = Array.from(canvas.querySelectorAll(".ui-control"));
       ctrls.forEach((c,i)=>c.style.zIndex=i);
       ctrls.forEach(c=>{
-        const li=document.createElement("li");
+        const li = document.createElement("li");
         li.draggable=true;
         li.style.display="flex"; li.style.alignItems="center"; li.style.justifyContent="space-between"; li.style.marginBottom="8px";
 
-        const handle=document.createElement("div");
+        const handle = document.createElement("div");
         handle.innerHTML='<i class="fas fa-grip-lines" style="color:white;font-size:12px;"></i>';
-        const nameDiv=document.createElement("div");
+        const nameDiv = document.createElement("div");
         nameDiv.className="name";
         nameDiv.textContent=c.getAttribute("data-name");
-        const delBtn=document.createElement("button");
+        const delBtn = document.createElement("button");
         delBtn.textContent="×";
         delBtn.style.background="#c00"; delBtn.style.color="#fff"; delBtn.style.border="none";
         delBtn.style.borderRadius="2px"; delBtn.style.padding="2px 4px"; delBtn.style.fontSize="12px";
@@ -1332,24 +1589,32 @@
       });
     }
 
-    /********** Create Control **********/
+    // Create Control
     function createControl(type,defs){
       controlCounter++;
       const el=document.createElement("div");
       el.className="ui-control";
-      el.style.left = (defs.x!==undefined?defs.x:20)+"px";
-      el.style.top  = (defs.y!==undefined?defs.y:20)+"px";
-      el.style.width  = (defs.w!==undefined?defs.w:100)+"px";
-      el.style.height = (defs.h!==undefined?defs.h:60)+"px";
+      el.style.left   = (defs.left   !==undefined?defs.left:20)+"px";
+      el.style.top    = (defs.top    !==undefined?defs.top:20)+"px";
+      el.style.width  = (defs.width  !==undefined?defs.width:100)+"px";
+      el.style.height = (defs.height !==undefined?defs.height:60)+"px";
       el.setAttribute("data-id","ctrl_"+(++controlCounter));
       el.setAttribute("data-type",type);
       el.setAttribute("data-name",defs.name||type);
       el.setAttribute("data-text",defs.text||"");
       Object.entries(defs).forEach(([k,v])=>{
-        if(!["x","y","w","h","name","text"].includes(k)) el.setAttribute("data-"+k, v);
-      });
-
-      const defC=defaultControls[type];
+      
+   if(!["left","top","width","height","name","text"].includes(k)){
+       el.setAttribute("data-"+k,
+           Array.isArray(v)           // keep arrays as JSON so we can revive them
+           ? JSON.stringify(v)
+           :  v);
+   }
+   });
+      const defC = defaultControls[type];
+      if(defC?.draw){
+        try{ defC.drawFunc = eval('('+defC.draw+')'); }catch{}
+      }
       if(defC?.drawFunc){
         const cv=document.createElement("canvas");
         cv.className="control-draw-canvas";
@@ -1363,6 +1628,7 @@
         el.append(cc);
       }
 
+      //Click to create control
       el.addEventListener("mousedown",()=> selectControl(el));
       el.addEventListener("contextmenu",e=>{
         e.preventDefault();
@@ -1373,10 +1639,16 @@
       initInteract(el);
       canvas.append(el);
       refreshTree();
+
+      // immediately persist + refresh explorer
+      if (!bulkLoading) {
+      saveCurrentView();
+      renderProjectTree();
+    }
       return el;
     }
 
-    /********** Keyboard Shortcuts **********/
+    // Keyboard Shortcuts
     document.addEventListener("keydown",e=>{
       if(["INPUT","TEXTAREA"].includes(document.activeElement.tagName)) return;
       if(!selectedControl) return;
@@ -1385,22 +1657,22 @@
       switch(e.key){
         case "ArrowUp":
           selectedControl.style.top=(t-1)+"px";
-          updateProperty("y",t-1,"control");
+          updateProperty("top",t-1,"control");
           e.preventDefault();
           break;
         case "ArrowDown":
           selectedControl.style.top=(t+1)+"px";
-          updateProperty("y",t+1,"control");
+          updateProperty("top",t+1,"control");
           e.preventDefault();
           break;
         case "ArrowLeft":
           selectedControl.style.left=(l-1)+"px";
-          updateProperty("x",l-1,"control");
+          updateProperty("left",l-1,"control");
           e.preventDefault();
           break;
         case "ArrowRight":
           selectedControl.style.left=(l+1)+"px";
-          updateProperty("x",l+1,"control");
+          updateProperty("left",l+1,"control");
           e.preventDefault();
           break;
         case "Backspace":
@@ -1411,7 +1683,7 @@
       }
     });
 
-    /********** Save / Load Project **********/
+    // Save / Load Project
     function saveDesign(){
       if(currentCodeNode) currentCodeNode.content=codeEditor.getValue();
       saveCurrentView();
@@ -1434,7 +1706,7 @@
           canvas.innerHTML="";
           currentViewNode=null; currentCodeNode=null;
           canvas.style.display="none";
-          document.getElementById("editor").style.display="none";
+          editor.style.display="none";
           codeEditor.setValue("");
           document.getElementById("propPanel").innerHTML="";
         }
@@ -1447,9 +1719,9 @@
       if(e.target.files.length) loadDesign(e.target.files[0]);
     });
 
-    /********** Splitters **********/
-    // Horizontal
-    (()=>{ const split=document.getElementById("splitter");
+    // Splitters
+    ;(function(){
+      const split=document.getElementById("splitter");
       let resizing=false, startY, startH;
       split.addEventListener("mousedown",e=>{
         resizing=true; startY=e.clientY;
@@ -1463,12 +1735,12 @@
         nh=Math.max(50,Math.min(nh,tp-50));
         document.getElementById("propPanel").style.height=nh+"px";
       });
-      document.addEventListener("mouseup",e=>{
+      document.addEventListener("mouseup",()=>{
         if(resizing){ resizing=false; document.body.style.cursor="default"; }
       });
     })();
-    // Vertical left
-    (()=>{ const sp=document.getElementById("vSplitterLeft");
+    ;(function(){
+      const sp=document.getElementById("vSplitterLeft");
       let vs=false, sx, we, wc;
       sp.addEventListener("mousedown",e=>{
         vs=true; sx=e.clientX;
@@ -1485,12 +1757,12 @@
         document.getElementById("canvas-container").style.flexBasis=nc+"px";
         updateEditorSize();
       });
-      document.addEventListener("mouseup",e=>{
+      document.addEventListener("mouseup",()=>{
         if(vs){ vs=false; document.body.style.cursor="default"; updateEditorSize(); }
       });
     })();
-    // Vertical right
-    (()=>{ const sp=document.getElementById("vSplitterRight");
+    ;(function(){
+      const sp=document.getElementById("vSplitterRight");
       let vs=false, sx, wc, wt;
       sp.addEventListener("mousedown",e=>{
         vs=true; sx=e.clientX;
@@ -1507,12 +1779,12 @@
         document.getElementById("tabPanel").style.width=nt+"px";
         updateEditorSize();
       });
-      document.addEventListener("mouseup",e=>{
+      document.addEventListener("mouseup",()=>{
         if(vs){ vs=false; document.body.style.cursor="default"; updateEditorSize(); }
       });
     })();
 
-    /********** Deselect on Canvas **********/
+    // Deselect on Canvas
     canvas.addEventListener("mousedown",e=>{
       if(!e.target.closest(".ui-control")){
         if(selectedControl){
@@ -1525,14 +1797,15 @@
       }
     });
 
-    /********** Resource Menu & Add **********/
-    (()=>{ const btn=document.getElementById("addResourceBtn"),
+    // Resource Menu & Add
+    ;(function(){
+      const btn=document.getElementById("addResourceBtn"),
             menu=document.getElementById("resourceMenu");
       btn.addEventListener("click",e=>{
         e.stopPropagation();
         const r=btn.getBoundingClientRect();
         menu.style.left=(r.right-120)+"px";
-        menu.style.top=(r.bottom)+"px";
+        menu.style.top=r.bottom+"px";
         menu.style.display="block";
       });
       document.addEventListener("click",()=>menu.style.display="none");
@@ -1546,9 +1819,11 @@
           }
           else if(t==="view"){
             const nv={ name:"NewView",type:"view",collapsed:false,
-              designer:{ name:"NewView",width:375,height:667,backgroundColor:"#ffffff" },controls:[] };
+                       designer:{ name:"NewView",width:375,height:667,backgroundColor:"#1a1a1a",viewType:0 },
+                       controls:[] };
             projectTree.children.push(nv);
             renderProjectTree();
+            toolboxBtn.disabled=false;
             loadView(nv);
           }
           else if(t==="module"){
@@ -1567,7 +1842,7 @@
       });
     })();
 
-    /********** Asset File Input **********/
+    // Asset File Input
     document.getElementById("assetFileInput").addEventListener("change",e=>{
       const files=Array.from(e.target.files),
             fileData=files.map(f=>({ name:f.name,type:"file",fileUrl:"",filePath:"" }));
@@ -1581,11 +1856,35 @@
       e.target.value="";
     });
 
-    /********** Run/Build Placeholders **********/
-    document.getElementById("runBtn").addEventListener("click",e=>{ e.stopPropagation(); alert("Run action triggered"); });
-    document.getElementById("buildBtn").addEventListener("click",e=>{ e.stopPropagation(); alert("Build action triggered"); });
+    // Run/Build Placeholders
+    document.getElementById("buildBtn").addEventListener("click",e=>{ 
+      e.stopPropagation(); 
 
-    /********** Tab Switching **********/
+      const d={ projectTree };
+      var code = generateCrossBasicFromProjectTree(d);
+      const str="data:text/plain,"+encodeURIComponent(code);
+      const a=document.createElement("a");
+      a.href=str; a.download="project.xs"; a.click();
+      alert("Project Code has been Downloaded."); 
+    });
+
+    document.getElementById("runBtn").addEventListener("click", e => {
+      e.stopPropagation();
+
+      // Generate the CrossBasic source from the project tree
+      const code = generateCrossBasicFromProjectTree({ projectTree });
+
+      // Ship it to the server
+      fetchFunctionCall(
+        "build",
+        { code },                                  // query-string param
+        result => alert("✅ Running: " + result),
+        err    => alert("❌ Failed or Running Remotely: "  + err)
+      );
+    });
+
+
+    // Tab Switching
     document.querySelectorAll("#tabHeaders button").forEach(btn=>{
       btn.addEventListener("click",()=>{
         document.querySelectorAll("#tabHeaders button").forEach(x=>x.classList.remove("active"));
@@ -1595,14 +1894,14 @@
       });
     });
 
-    /********** Load Toolbox from controls.json **********/
+    // Load Toolbox from controls.json
     document.addEventListener("DOMContentLoaded",()=>{
       toolboxBtn.disabled=true;
       fetch('controls.json').then(r=>r.json()).then(data=>{
         data.controls.forEach(ctrl=>{
           defaultControls[ctrl.type]=ctrl;
           if(ctrl.draw){
-            try{ ctrl.drawFunc=eval('('+ctrl.draw+')'); }catch(e){ console.error(e); }
+            try{ ctrl.drawFunc=eval('('+ctrl.draw+')'); }catch{}
           }
           const item=document.createElement("div");
           item.className="toolbox-item";
@@ -1629,6 +1928,7 @@
             const nc=createControl(ctrl.type,Object.assign({},defs,{ name:ctrl.displayName,text:defs.text }));
             selectControl(nc);
             renderPropertiesPanel();
+            
           });
           document.getElementById("toolbox").append(item);
         });
@@ -1636,7 +1936,9 @@
         renderProjectTree();
       }).catch(err=>console.error("controls.json load err",err));
     });
-
   </script>
+
+  <script src="js/crossbasic-project-compiler.js"></script>
+  <script src="js/crossbasic-web-framework.js"></script>
 </body>
 </html>

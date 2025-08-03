@@ -1,0 +1,1 @@
+g++ -shared -m64 -static -static-libgcc -static-libstdc++ -o XTimer.dll XTimer.cpp -pthread -s

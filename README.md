@@ -2,9 +2,13 @@
 
 This is the very first cross-platform Compiler and VM written by AI and an Agent Team, under direction of Matthew A Combatti. An AI powered plugin creator app is in the works for other developers to rapidly generate plugins for themselves and the community, using natural language. Plugins already exist and are currently under development to bring native AI and machine learning to CrossBasic. Huggingface models, Ollama, and commercial models will also be easily accessible. 🤗
 
+[![License: CBSL-1.1](https://img.shields.io/badge/license-CBSL--1.1-blue)](https://www.crossbasic.com/license)
+
+> 📜 **License:** This project is licensed under the [Business Source License 1.1 (BUSL-1.1)](./LICENSE.md). You may use CrossBasic to build your own projects, including commercially. You may not sell, fork, repackage, or monetize CrossBasic itself without permission. Contact [mcombatti@simulanics.com](mailto:mcombatti@simulanics.com) for commercial licensing.
+
 # What is CrossBasic?
 
-An open-source compiler and virtual machine for the Xojo programming language (akin to modern Visual Basic). Compile and Run CrossBasic programs at native machine-code speeds, on any system or architecture. This includes 99.9% of devices - even the web [using emscripten]! 🙏
+A compiler and virtual machine for the Xojo-esqe programming language (akin to modern Visual Basic). Compile and Run CrossBasic programs at native machine-code speeds, on any system or architecture. This includes 99.9% of devices - even the web [using emscripten]! 🙏
 
 # CrossBasic Bytecode Compiler and Virtual Machine 🚀
 
@@ -19,13 +23,14 @@ Welcome to the **CrossBasic Bytecode Compiler and Virtual Machine**! This projec
 - **Module Support:** Create XojoScript-style Modules.
 - **Class & Instance Support:** Create classes, define methods, and instantiate objects.
 - **Intrinsic Types:** Handles types like Color, Integer, Double, Boolean, Variant, Pointer and String.
-- **Bytecode Execution:** Runs compiled bytecode on a custom VM.
+- **Custom Types:** Supports creation of any Class type as a Variable. Pass or return any intrinsic or custom types between functions, subs, or plugins and event handlers.
+- **Bytecode Execution:** Runs compiled bytecode on a custom cross-platform Virtual Machine (VM).
 - **Debug Logging:** Step-by-step debug logs to trace lexing, parsing, compiling, and execution.
 - **Intuitive Syntax:** Matches Xojo language syntax (Currently, functions require parenthesis - this is for debugging purposes. Parenthesis will be optional at a later date, as in Xojo's implementation, for interoperability and consistency.)
 - **Console / Web / GUI:** Build all sorts of applications from a single code-base.
 - **IDE - Create Apps and Software Anywhere:** CrossBasic offers a RAD (Rapid Application Development) IDE that's accessible from any web-accessible device. Develop at home, work, or on the go when inspiration hits! Online, offline, or run it locally! 🤗 (https://ide.crossbasic.com)
 - **Embeddable Library Support:** Embed CrossBasic as a static or dynamic linked library for use with other languages.
-- **Open Source:** Released under the MIT License.
+- **Source Code Transparency:** Released under the CBSL-1.1 License.
 
 ## Getting Started 🏁
 
@@ -123,7 +128,7 @@ Contributions are welcome! Please feel free to open issues or submit pull reques
 
 License 📄
 
-This project is licensed under the MIT License. See the LICENSE file for details.
+This project is licensed under the CBSL-1.1 License. See the LICENSE file for details.
 
 ---
 

@@ -1,1 +1,0 @@
-g++ -s -shared -m64 -static -static-libgcc -static-libstdc++ -o InstanceClass.dll InstanceClass.cpp

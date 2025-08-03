@@ -1,0 +1,1 @@
+g++ -shared -m64 -static -static-libgcc -static-libstdc++ -o XThread.dll XThread.cpp -pthread -s

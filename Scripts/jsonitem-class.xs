@@ -1,82 +1,62 @@
-// Create a new JSONItem instance
+// -----------------------------------------------------------------------------
+// Demo: JSONItem Usage in CrossBasic
+// This example demonstrates creating and manipulating a JSON structure using
+// the JSONItem class. It shows how to set values, nest arrays/objects, format
+// output, check keys, retrieve values, and remove elements.
+// -----------------------------------------------------------------------------
+
+
+// Create a new JSONItem instance to hold structured data
 Var jItem As New JSONItem
 
-// Set some values (acting like a dictionary).
-jItem.SetValue("Name", "John Doe")
-jItem.SetValue("Age", "32")
-jItem.SetValue("Married", "true")
-jItem.SetValue("Spouse", "Jane Doe")
+// Set key-value pairs for basic properties in the JSON object
 
-// Create a new JSONItem for an array of kids.
+jItem.SetValue("Name",    "John Doe")
+jItem.SetValue("Age",     "32")
+jItem.SetValue("Married", "true")
+jItem.SetValue("Spouse",  "Jane Doe")
+
+
+// Create a new JSONItem instance to hold an array of children
 Var kids As New JSONItem
 kids.Add("Alice")
 kids.Add("Bob")
 kids.Add("Charlie")
 
-// Set the Kids property of the person object.
-jItem.SetValue("Kids", kids.ToString)
+// Add the 'kids' array as a child object of the main JSON structure
+jItem.SetValue("Kids", kids.toString) 
 
-// Optionally, set formatting properties.
-jItem.Compact = False      ' Produce pretty printed JSON.
-jItem.IndentSpacing = 4    ' Use 4 spaces per indent.
 
-// Get the JSON string.
-Var jsonString As String = jItem.ToString
-Print "JSONItem ToString output:"
-Print jsonString
+// Configure the JSON output: human-readable with indentation
+jItem.Compact       = False        // Disable compact formatting
+jItem.IndentSpacing = 4           // Use 4-space indentation
 
-// Display some properties.
-Print "Count: " + Str(jItem.Count())
+// Display the full formatted JSON string
+Print("JSONItem ToString output:")
+Print(jItem.toString)
+
+// Print the number of top-level keys in the JSON object
+Print("Count: " + Str(jItem.Count))
+
+// Check for the existence of the "Name" key and output result
 If jItem.HasKey("Name") Then
-  Print "Name key exists."
+  Print("Name key exists.")
 Else
-  Print "Name key missing."
+  Print("Name key missing.")
 End If
 
-// Lookup a value with a default.
-Var ageValue As String = jItem.Lookup("Age", "Not Found")
-Print("Age: " + ageValue)
+// Safely retrieve the value of the "Age" key, or return "Not Found" if missing
+Print("Age: " + jItem.Lookup("Age", "Not Found")) //Returns a plain string
+Print("Age: " + jItem.value("Age")) //Returns JSONItem converted to a String by Print()
+Print("Name: " + jItem.value("Name")) //Returns JSONItem converted to a String by Print()
 
-// Get keys (returns a JSON array string of keys).
-Var keysString As String = jItem.Keys()
-Print("Keys: " + keysString)
+// Print a list of all keys in the JSON object
+Print("Keys: " + jItem.Keys()) //JSONItem Array as String by Print()
 
-// Remove a key and display updated JSON.
+// Remove the "Married" key from the object
 jItem.Remove("Married")
 Print("After removing 'Married': " + jItem.ToString)
 
-// Finally, destroy the JSONItem instance.
+// Release resources for both JSONItem instances
 jItem.Close()
-
-
-
-// --- JSONItem Array Demo ---
-
-// Create a new JSONItem instance to be used as an array.
-Var arr As New JSONItem
-
-// Add several elements to the array.
-arr.Add("Apple")
-arr.Add("Banana")
-arr.Add("Cherry")
-
-// Insert an element at index 1.
-arr.AddAt(1, "Blueberry")
-
-// Output the JSON representation of the array.
-Print("Array JSONItem (ToString): " + arr.ToString)
-
-// Loop through the array.
-// (Assuming the plugin exposes a method ValueAt(index) to return the element at that index.)
-For i As Integer = 0 To arr.Count() - 1
-    // Retrieve the element at index i.
-    Var element As String = arr.ValueAt(i)
-    Print("Element " + Str(i) + ": " + element)
-Next i
-
-// (Optional) If needed, remove an element and display the updated array.
-arr.RemoveAt(2) // Removes the element at index 2.
-Print("After RemoveAt(2): " + arr.ToString)
-
-// Finally, destroy the JSONItem instance.
-arr.Close()
+kids.Close()

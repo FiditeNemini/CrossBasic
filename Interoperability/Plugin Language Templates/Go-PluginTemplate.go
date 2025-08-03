@@ -1,7 +1,4 @@
 // PluginTemplate.go
-// Created by Matthew A Combatti
-// Simulanics Technologies and Xojo Developers Studio
-// -----------------------------------------------------------------------------
 // Build commands:
 // Windows: go build -buildmode=c-shared -o PluginTemplate.dll PluginTemplate.go
 // Linux:   go build -buildmode=c-shared -o PluginTemplate.so PluginTemplate.go

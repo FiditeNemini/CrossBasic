@@ -1,0 +1,1 @@
+g++ -shared -o BigInteger.dll BigInteger.cpp -lgmp -static-libgcc -static-libstdc++ -O3 -std=c++17 -s -static

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Home</title>
+   <style>
+    body { font-family: sans-serif; display: flex; justify-content: center; padding-top: 2em; }
+    #calc { border: 1px solid #444; padding: 1em; border-radius: 8px; }
+    #display { width: 200px; height: 30px; font-size: 1.2em; text-align: right; margin-bottom: 0.5em; }
+    .btn { width: 45px; height: 45px; margin: 2px; font-size: 1.1em; }
+  </style>
+  <script src="js/crossbasic-web-framework.js"></script>
+  <script>
+
+// --- Calculator logic ---
+
+let expr = "";
+
+function press(v) {
+  expr += v;
+  document.getElementById('display').value = expr;
+}
+
+function calc() {
+  fetchFunctionCall(
+    "calculate", 
+    { expr }, 
+    result => {
+      expr = result;
+      document.getElementById('display').value = result;
+    },
+    error => {
+      expr = "";
+      document.getElementById('display').value = error;
+    }
+  );
+}
+
+// --- Generic callCppFunction wrapper using server interface ---
+function callCpp(f, param) {
+  fetchFunctionCall(
+    f, 
+    { expr: param },
+    result => {
+      document.getElementById("result").innerText = result;
+    }
+  );
+}
+  </script>
+</head>
+<body>
+   <div>
+  <button onclick="callCpp('hello')">Hello</button>
+  <button onclick="callCpp('redirect')">Redirect</button>
+  <pre id="result"></pre>
+  </div>
+  <hr>
+  <div id="calc">
+    <input id="display" readonly />
+    <div>
+      <button class="btn" onclick="press('7')">7</button>
+      <button class="btn" onclick="press('8')">8</button>
+      <button class="btn" onclick="press('9')">9</button>
+      <button class="btn" onclick="press('/')">&divide;</button>
+    </div>
+    <div>
+      <button class="btn" onclick="press('4')">4</button>
+      <button class="btn" onclick="press('5')">5</button>
+      <button class="btn" onclick="press('6')">6</button>
+      <button class="btn" onclick="press('*')">&times;</button>
+    </div>
+    <div>
+      <button class="btn" onclick="press('1')">1</button>
+      <button class="btn" onclick="press('2')">2</button>
+      <button class="btn" onclick="press('3')">3</button>
+      <button class="btn" onclick="press('-')">&minus;</button>
+    </div>
+    <div>
+      <button class="btn" onclick="press('0')">0</button>
+      <button class="btn" onclick="press('.')">.</button>
+      <button class="btn" onclick="calc()">=</button>
+      <button class="btn" onclick="press('+')">+</button>
+    </div>
+    <div style="text-align:center; margin-top:0.5em;">
+      <button onclick="window.location.href='/'">Go Back</button>
+    </div>
+  </div>
+</body>
+</html>

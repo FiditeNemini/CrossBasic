@@ -1,0 +1,4 @@
+#include <windows.h>
+
+// Tell Windows to load Common-Controls v6 for this DLL
+1 RT_MANIFEST "XGraphics.manifest"

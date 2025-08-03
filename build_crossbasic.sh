@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Compile crossbasic.cpp using g++
-g++ -o crossbasic crossbasic.cpp -lffi -O3 -march=native -mtune=native -flto -m64 2> error.log
+g++ -o crossbasic ./CrossBasic/crossbasic.cpp -lffi -O3 -march=native -mtune=native -flto -m64 2> error.log
 
 # Check if compilation was successful
 if [ $? -ne 0 ]; then
@@ -18,12 +18,12 @@ mv -f crossbasic release-64/
 
 # Dump shared library dependencies based on OS and build CrossBasic Embeddable Library
 if [[ "$(uname)" == "Darwin" ]]; then
-	g++ -o crossbasic.dylib crossbasic.cpp -lffi -O3 -march=native -mtune=native -flto -m64 2> errorlib.log
+	g++ -o crossbasic.dylib ./CrossBasic/crossbasic.cpp -lffi -O3 -march=native -mtune=native -flto -m64 2> errorlib.log
 	mv -f crossbasic.dylib release-64/
     echo "Dylib dependencies:"
     otool -L release-64/crossbasic
 elif [[ "$(uname)" == "Linux" ]]; then
-	g++ -o crossbasic.so crossbasic.cpp -lffi -O3 -march=native -mtune=native -flto -m64 2> errorlib.log
+	g++ -o crossbasic.so ./CrossBasic/crossbasic.cpp -lffi -O3 -march=native -mtune=native -flto -m64 2> errorlib.log
 	mv -f crossbasic.so release-64/
     echo "Shared library dependencies:"
     ldd release-64/crossbasic

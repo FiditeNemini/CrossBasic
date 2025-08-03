@@ -1,40 +1,30 @@
-// JSONItem.cpp
-// Created by Matthew A Combatti  
-// Simulanics Technologies and Xojo Developers Studio  
-// https://www.simulanics.com  
-// https://www.xojostudio.org  
-// DISCLAIMER: Simulanics Technologies and Xojo Developers Studio are not affiliated with Xojo, Inc.
-// -----------------------------------------------------------------------------  
-// Copyright (c) 2025 Simulanics Technologies and Xojo Developers Studio  
-//  
-// Permission is hereby granted, free of charge, to any person obtaining a copy  
-// of this software and associated documentation files (the "Software"), to deal  
-// in the Software without restriction, including without limitation the rights  
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell  
-// copies of the Software, and to permit persons to whom the Software is  
-// furnished to do so, subject to the following conditions:  
-//  
-// The above copyright notice and this permission notice shall be included in all  
-// copies or substantial portions of the Software.  
-//  
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR  
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,  
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE  
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER  
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,  
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE  
-// SOFTWARE.
-// ----------------------------------------------------------------------------- 
+/*
+
+  JSONItem.cpp
+  CrossBasic Plugin: JSONItem                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      4r
+ 
+  Copyright (c) 2025 Simulanics Technologies – Matthew Combatti
+  All rights reserved.
+ 
+  Licensed under the CrossBasic Source License (CBSL-1.1).
+  You may not use this file except in compliance with the License.
+  You may obtain a copy of the License at:
+  https://www.crossbasic.com/license
+ 
+  SPDX-License-Identifier: CBSL-1.1
+  
+  Author:
+    The AI Team under direction of Matthew Combatti <mcombatti@crossbasic.com>
+    
+*/
 
 #ifdef _WIN32
-  // Prevent unnecessary definitions and conflicts.
   #ifndef NOMINMAX
     #define NOMINMAX
   #endif
   #define WIN32_LEAN_AND_MEAN
   #define _WINSOCKAPI_
   #include <windows.h>
-  // Undefine the conflicting "byte" macro from Windows headers.
   #undef byte
   #define XPLUGIN_API __declspec(dllexport)
 #else
@@ -43,524 +33,399 @@
 
 #include <string>
 #include <vector>
-#include <sstream>
-#include <iomanip>
 #include <stdexcept>
 #include <algorithm>
 #include <mutex>
 #include <map>
 #include <atomic>
-#include <cstdlib>
 #include "nlohmann/json.hpp"
 
 using json = nlohmann::json;
 using namespace std;
 
-// -----------------------------------------------------------------------------
-// JSONItem Class Definition
-// -----------------------------------------------------------------------------
+// ─────────────────────────────────────────────────────────────────────────────
+// helper: best-effort parse – returns {parsed = true} when legal JSON,
+// otherwise {parsed = false, j = unused}
+// ─────────────────────────────────────────────────────────────────────────────
+static json tryParse(const string& src, bool& parsed) noexcept {
+    try {
+        json j = json::parse(src);
+        parsed = true;
+        return j;
+    } catch (...) {
+        parsed = false;
+        return json();
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// JSONItem – internal class
+// ─────────────────────────────────────────────────────────────────────────────
 class JSONItem {
 public:
-    // Public member to store the instance handle.
-    int Handle;
-    // Internal JSON data.
-    json data;
-    // Formatting properties.
-    bool Compact;      // When true (default), produces compact JSON.
-    int IndentSpacing; // Number of spaces for indentation when Compact is false.
+    int   Handle;
+    json  data;
+    bool  Compact;
+    int   IndentSpacing;
 
-    // Constructor: creates an empty JSON object.
-    JSONItem() : Handle(0), data(json::object()), Compact(true), IndentSpacing(3) { }
+    JSONItem()
+      : Handle(0),
+        data(json::object()),
+        Compact(true),
+        IndentSpacing(3)
+    {}
 
-    // Loads and parses the JSON string.
-    void Load(const string &jsonString) {
-        try {
-            data = json::parse(jsonString);
-        } catch (...) {
-            throw runtime_error("Failed to parse JSON string.");
-        }
-    }
+    // basic I/O
+    void   Load(const string& s)        { data = json::parse(s); }
+    string ToString() const             { return Compact ? data.dump()
+                                                      : data.dump(IndentSpacing); }
 
-    // Returns a JSON string representing the current object.
-    string ToString() {
-        if (Compact)
-            return data.dump();
-        else
-            return data.dump(IndentSpacing);
-    }
+    // structure queries
+    int    Count() const                { return data.is_object() || data.is_array()
+                                             ? (int)data.size() : 0; }
+    bool   HasKey(const string& k) const{ return data.is_object() && data.contains(k); }
+    bool   IsArray() const              { return data.is_array(); }
 
-    // Returns the number of children (keys for objects or size for arrays).
-    int Count() {
-        if (data.is_object() || data.is_array())
-            return static_cast<int>(data.size());
-        return 0;
-    }
-
-    // Returns true if the JSONItem (object) contains the specified key.
-    bool HasKey(const string &key) {
+    vector<string> Keys() const {
+        vector<string> k;
         if (data.is_object())
-            return data.find(key) != data.end();
-        return false;
+            for (auto& e : data.items())
+                k.push_back(e.key());
+        return k;
     }
 
-    // Returns true if the JSONItem is an array.
-    bool IsArray() {
-        return data.is_array();
+    int LastRowIndex() const            { return data.is_array()
+                                             ? (int)data.size() - 1
+                                             : -1; }
+
+    string Lookup(const string& k, const string& def) const {
+        return HasKey(k) ? data[k].dump() : def;
     }
 
-    // Returns the key at the specified index (for objects).
-    string KeyAt(int index) {
-        if (data.is_object()) {
-            int i = 0;
-            for (auto it = data.begin(); it != data.end(); ++it) {
-                if (i == index)
-                    return it.key();
-                i++;
-            }
-        }
-        return "";
+    void Remove(const string& k)        { if (data.is_object()) data.erase(k); }
+    void RemoveAll()                    { data.clear(); }
+
+    // ── Array helpers ───────────────────────────────────────────────────────
+    void Add(const string& v) {
+        if (!data.is_array()) data = json::array();
+        bool ok = false;
+        json j = tryParse(v, ok);
+        data.push_back(ok ? j : json(v));
     }
 
-    // Returns the keys as a vector of strings (for objects).
-    vector<string> Keys() {
-        vector<string> result;
-        if (data.is_object()) {
-            for (auto& el : data.items())
-                result.push_back(el.key());
-        }
-        return result;
+    void AddAt(int idx, const string& v) {
+        if (!data.is_array()) data = json::array();
+        if (idx < 0 || idx > (int)data.size()) return;
+        bool ok = false;
+        json j = tryParse(v, ok);
+        data.insert(data.begin() + idx, ok ? j : json(v));
     }
 
-    // Returns the last row index (for arrays).
-    int LastRowIndex() {
-        if (data.is_array())
-            return static_cast<int>(data.size()) - 1;
-        return -1;
+    string ValueAt(int idx) const {
+        if (!data.is_array() || idx < 0 || idx >= (int)data.size())
+            throw out_of_range("ValueAt – index out of range");
+        return data[idx].dump();
     }
 
-    // Looks up the value for a given key; returns defaultValue if key not found.
-    string Lookup(const string &key, const string &defaultValue) {
-        if (data.is_object() && data.contains(key))
-            return data[key].dump();
-        return defaultValue;
+    void RemoveAt(int idx) {
+        if (data.is_array() && idx >= 0 && idx < (int)data.size())
+            data.erase(data.begin() + idx);
     }
 
-    // Removes the child with the specified key (for objects).
-    void Remove(const string &key) {
-        if (data.is_object())
-            data.erase(key);
+    // ── Object helpers ──────────────────────────────────────────────────────
+    string Value(const string& k) const {
+        return HasKey(k) ? data[k].dump() : "";
     }
 
-    // Removes all children.
-    void RemoveAll() {
-        data.clear();
+    void SetValue(const string& k, const string& v) {
+        if (!data.is_object()) data = json::object();
+        bool ok = false;
+        json j = tryParse(v, ok);
+        data[k] = ok ? j : json(v);
     }
 
-    // Adds a value to the end of the array.
-    void Add(const string &value) {
-        if (!data.is_array())
-            data = json::array();
-        data.push_back(value);
+    // ── Child JSONItem helpers ─────────────────────────────────────────────
+    JSONItem Child(const string& k) const {
+        JSONItem c;
+        if (HasKey(k)) c.data = data[k];
+        return c;
     }
 
-    // Adds a value at the specified index in the array.
-    void AddAt(int index, const string &value) {
-        if (!data.is_array())
-            data = json::array();
-        if (index >= 0 && index <= data.size())
-            data.insert(data.begin() + index, value);
-    }
-
-    // Gets the value for the given key (for objects) as a JSON string.
-    string Value(const string &key) {
-        if (data.is_object() && data.contains(key))
-            return data[key].dump();
-        return "";
-    }
-
-    // Sets the value for the given key (for objects).
-    void SetValue(const string &key, const string &value) {
-        if (!data.is_object())
-            data = json::object();
-        data[key] = value;
-    }
-    
-    // --- New Method for Array Access ---
-    // Returns the array element at the specified index as a JSON string.
-    string ValueAt(int index) {
-        if (data.is_array() && index >= 0 && index < data.size())
-            return data[index].dump();
-        throw out_of_range("Index out of range in ValueAt");
-    }
-    
-    // Removes the array element at the specified index.
-    void RemoveAt(int index) {
-        if (data.is_array() && index >= 0 && index < data.size())
-            data.erase(data.begin() + index);
-    }
-    
-    // Sets a child JSONItem for the given key (stores the child’s internal JSON directly).
-    void SetChild(const string &key, const JSONItem &child) {
-        if (!data.is_object())
-            data = json::object();
-        data[key] = child.data;
-    }
-    
-    // Gets a child JSONItem for the given key.
-    JSONItem Child(const string &key) {
-        JSONItem child;
-        if (data.is_object() && data.contains(key))
-            child.data = data[key];
-        return child;
+    void SetChild(const string& k, const JSONItem& child) {
+        if (!data.is_object()) data = json::object();
+        data[k] = child.data;
     }
 };
 
-// -----------------------------------------------------------------------------
-// Global Instance Management for JSONItem Instances
-// -----------------------------------------------------------------------------
-static mutex jsonMutex;
-static map<int, JSONItem*> jsonMap;
-static atomic<int> nextJsonHandle(1);
+// ─────────────────────────────────────────────────────────────────────────────
+// handle ↔ instance management
+// ─────────────────────────────────────────────────────────────────────────────
+static mutex               mtx;
+static map<int, JSONItem*> instances;
+static atomic<int>         nextHandle(1);
 
-// -----------------------------------------------------------------------------
-// Exported Functions (extern "C")
-// -----------------------------------------------------------------------------
-extern "C" {
-
-// Creates a new JSONItem instance and returns its unique handle.
-XPLUGIN_API int NewJSONItem() {
-    JSONItem* item = new JSONItem();
-    int handle = nextJsonHandle.fetch_add(1);
-    item->Handle = handle; // Store the handle in the instance.
-    lock_guard<mutex> lock(jsonMutex);
-    jsonMap[handle] = item;
-    return handle;
+static JSONItem* fetch(int h) {
+    auto it = instances.find(h);
+    return it == instances.end() ? nullptr : it->second;
 }
 
-// Returns the Handle property of the JSONItem instance.
-XPLUGIN_API int JSONItem_GetHandle(int handle) {
-    lock_guard<mutex> lock(jsonMutex);
-    auto it = jsonMap.find(handle);
-    if (it != jsonMap.end())
-        return it->second->Handle;
+static int makeHandle(JSONItem* p) {
+    int h = nextHandle.fetch_add(1);
+    p->Handle = h;
+    instances[h] = p;
+    return h;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// C-linkage API – exported to the byte-code VM
+// ─────────────────────────────────────────────────────────────────────────────
+extern "C" {
+
+// Constructor
+XPLUGIN_API int NewJSONItem() {
+    lock_guard<mutex> lk(mtx);
+    return makeHandle(new JSONItem());
+}
+
+// ToString property
+XPLUGIN_API const char* JSONItem_ToString(int h) {
+    static string out;
+    lock_guard<mutex> lk(mtx);
+    if (auto p = fetch(h)) out = p->ToString();
+    else                   out.clear();
+    return out.c_str();
+}
+
+// Count property (getter only)
+XPLUGIN_API int JSONItem_Count(int h) {
+    lock_guard<mutex> lk(mtx);
+    if (auto p = fetch(h)) return p->Count();
     return 0;
 }
 
-// Sets a child JSONItem for a given key using a child's handle.
-XPLUGIN_API void JSONItem_SetChild(int handle, const char* key, int childHandle) {
-    lock_guard<mutex> lock(jsonMutex);
-    auto it = jsonMap.find(handle);
-    auto childIt = jsonMap.find(childHandle);
-    if (it != jsonMap.end() && childIt != jsonMap.end()) {
-        it->second->SetChild(string(key), *(childIt->second));
-    }
+// IsArray
+XPLUGIN_API bool JSONItem_IsArray(int h) {
+    lock_guard<mutex> lk(mtx);
+    if (auto p = fetch(h)) return p->IsArray();
+    return false;
 }
 
-// Loads a JSON string into the JSONItem instance.
-XPLUGIN_API const char* JSONItem_Load(int handle, const char* jsonString) {
-    static string result;
-    lock_guard<mutex> lock(jsonMutex);
-    auto it = jsonMap.find(handle);
-    if (it == jsonMap.end())
-        return "Error: Invalid instance handle";
+// HasKey
+XPLUGIN_API bool JSONItem_HasKey(int h, const char* k) {
+    lock_guard<mutex> lk(mtx);
+    if (auto p = fetch(h)) return p->HasKey(k);
+    return false;
+}
+
+// LastRowIndex
+XPLUGIN_API int JSONItem_LastRowIndex(int h) {
+    lock_guard<mutex> lk(mtx);
+    if (auto p = fetch(h)) return p->LastRowIndex();
+    return -1;
+}
+
+// Handle getter
+XPLUGIN_API int JSONItem_GetHandle(int h) { return h; }
+
+// Compact property
+XPLUGIN_API const char* JSONItem_GetCompact(int h) {
+    static string s;
+    lock_guard<mutex> lk(mtx);
+    if (auto p = fetch(h)) s = p->Compact ? "true" : "false";
+    else                   s = "false";
+    return s.c_str();
+}
+XPLUGIN_API void JSONItem_SetCompact(int h, bool v) {
+    lock_guard<mutex> lk(mtx);
+    if (auto p = fetch(h)) p->Compact = v;
+}
+
+// IndentSpacing property
+XPLUGIN_API int  JSONItem_GetIndentSpacing(int h) {
+    lock_guard<mutex> lk(mtx);
+    if (auto p = fetch(h)) return p->IndentSpacing;
+    return 0;
+}
+XPLUGIN_API void JSONItem_SetIndentSpacing(int h, int v) {
+    lock_guard<mutex> lk(mtx);
+    if (auto p = fetch(h)) p->IndentSpacing = v;
+}
+
+// Load
+XPLUGIN_API const char* JSONItem_Load(int h, const char* j) {
+    static string res;
+    lock_guard<mutex> lk(mtx);
+    if (auto p = fetch(h)) {
+        try { p->Load(j); res = "OK"; }
+        catch (const exception& e) { res = e.what(); }
+    }
+    else res = "Error: invalid handle";
+    return res.c_str();
+}
+
+// Lookup
+XPLUGIN_API const char* JSONItem_Lookup(int h, const char* k, const char* d) {
+    static string out;
+    lock_guard<mutex> lk(mtx);
+    if (auto p = fetch(h)) out = p->Lookup(k, d);
+    else                   out = d;
+    return out.c_str();
+}
+
+// Value
+XPLUGIN_API const char* JSONItem_Value(int h, const char* k) {
+    static string out;
+    lock_guard<mutex> lk(mtx);
+    if (auto p = fetch(h)) out = p->Value(k);
+    else                   out.clear();
+    return out.c_str();
+}
+
+// SetValue
+XPLUGIN_API void JSONItem_SetValue(int h, const char* k, const char* v) {
+    lock_guard<mutex> lk(mtx);
+    if (auto p = fetch(h)) p->SetValue(k, v);
+}
+
+// Keys
+XPLUGIN_API const char* JSONItem_Keys(int h) {
+    static string out;
+    lock_guard<mutex> lk(mtx);
+    if (auto p = fetch(h)) out = json(p->Keys()).dump();
+    else                   out = "[]";
+    return out.c_str();
+}
+
+// Remove
+XPLUGIN_API void JSONItem_Remove(int h, const char* k) {
+    lock_guard<mutex> lk(mtx);
+    if (auto p = fetch(h)) p->Remove(k);
+}
+
+// RemoveAll
+XPLUGIN_API void JSONItem_RemoveAll(int h) {
+    lock_guard<mutex> lk(mtx);
+    if (auto p = fetch(h)) p->RemoveAll();
+}
+
+// Add
+XPLUGIN_API void JSONItem_Add(int h, const char* v) {
+    lock_guard<mutex> lk(mtx);
+    if (auto p = fetch(h)) p->Add(v);
+}
+
+// AddAt
+XPLUGIN_API void JSONItem_AddAt(int h, int i, const char* v) {
+    lock_guard<mutex> lk(mtx);
+    if (auto p = fetch(h)) p->AddAt(i, v);
+}
+
+// ValueAt
+XPLUGIN_API const char* JSONItem_ValueAt(int h, int i) {
+    static string out;
+    lock_guard<mutex> lk(mtx);
     try {
-        it->second->Load(string(jsonString));
-        result = "OK";
-    } catch (const exception &e) {
-        result = e.what();
+        if (auto p = fetch(h)) out = p->ValueAt(i);
+    } catch (const exception& e) {
+        out = e.what();
     }
-    return result.c_str();
+    return out.c_str();
 }
 
-// Returns a JSON string representing the current JSONItem.
-XPLUGIN_API const char* JSONItem_ToString(int handle) {
-    static string result;
-    lock_guard<mutex> lock(jsonMutex);
-    auto it = jsonMap.find(handle);
-    if (it == jsonMap.end())
-        return "";
-    result = it->second->ToString();
-    return result.c_str();
+// RemoveAt
+XPLUGIN_API void JSONItem_RemoveAt(int h, int i) {
+    lock_guard<mutex> lk(mtx);
+    if (auto p = fetch(h)) p->RemoveAt(i);
 }
 
-// Returns the number of children.
-XPLUGIN_API int JSONItem_Count(int handle) {
-    lock_guard<mutex> lock(jsonMutex);
-    auto it = jsonMap.find(handle);
-    if (it == jsonMap.end())
-        return 0;
-    return it->second->Count();
-}
-
-// Returns true if the JSONItem has the specified key.
-XPLUGIN_API bool JSONItem_HasKey(int handle, const char* key) {
-    lock_guard<mutex> lock(jsonMutex);
-    auto it = jsonMap.find(handle);
-    if (it == jsonMap.end())
-        return false;
-    return it->second->HasKey(string(key));
-}
-
-// Returns true if the JSONItem is an array.
-XPLUGIN_API bool JSONItem_IsArray(int handle) {
-    lock_guard<mutex> lock(jsonMutex);
-    auto it = jsonMap.find(handle);
-    if (it == jsonMap.end())
-        return false;
-    return it->second->IsArray();
-}
-
-// Returns the keys as a JSON array string.
-XPLUGIN_API const char* JSONItem_Keys(int handle) {
-    static string result;
-    lock_guard<mutex> lock(jsonMutex);
-    auto it = jsonMap.find(handle);
-    if (it == jsonMap.end())
-        return "[]";
-    vector<string> keys = it->second->Keys();
-    json j_keys = keys;
-    result = j_keys.dump();
-    return result.c_str();
-}
-
-// Returns the last row index (for arrays).
-XPLUGIN_API int JSONItem_LastRowIndex(int handle) {
-    lock_guard<mutex> lock(jsonMutex);
-    auto it = jsonMap.find(handle);
-    if (it == jsonMap.end())
-        return -1;
-    return it->second->LastRowIndex();
-}
-
-// Looks up the value for the given key; returns defaultValue if not found.
-XPLUGIN_API const char* JSONItem_Lookup(int handle, const char* key, const char* defaultValue) {
-    static string result;
-    lock_guard<mutex> lock(jsonMutex);
-    auto it = jsonMap.find(handle);
-    if (it == jsonMap.end())
-        return defaultValue;
-    result = it->second->Lookup(string(key), string(defaultValue));
-    return result.c_str();
-}
-
-// Removes the child with the specified key.
-XPLUGIN_API void JSONItem_Remove(int handle, const char* key) {
-    lock_guard<mutex> lock(jsonMutex);
-    auto it = jsonMap.find(handle);
-    if (it != jsonMap.end())
-        it->second->Remove(string(key));
-}
-
-// Removes all children.
-XPLUGIN_API void JSONItem_RemoveAll(int handle) {
-    lock_guard<mutex> lock(jsonMutex);
-    auto it = jsonMap.find(handle);
-    if (it != jsonMap.end())
-        it->second->RemoveAll();
-}
-
-// Adds a value to the end of the array.
-XPLUGIN_API void JSONItem_Add(int handle, const char* value) {
-    lock_guard<mutex> lock(jsonMutex);
-    auto it = jsonMap.find(handle);
-    if (it != jsonMap.end())
-        it->second->Add(string(value));
-}
-
-// Adds a value at the specified index.
-XPLUGIN_API void JSONItem_AddAt(int handle, int index, const char* value) {
-    lock_guard<mutex> lock(jsonMutex);
-    auto it = jsonMap.find(handle);
-    if (it != jsonMap.end())
-        it->second->AddAt(index, string(value));
-}
-
-// Gets the value for the given key.
-XPLUGIN_API const char* JSONItem_Value(int handle, const char* key) {
-    static string result;
-    lock_guard<mutex> lock(jsonMutex);
-    auto it = jsonMap.find(handle);
-    if (it == jsonMap.end())
-        return "";
-    result = it->second->Value(string(key));
-    return result.c_str();
-}
-
-// Sets the value for the given key.
-XPLUGIN_API void JSONItem_SetValue(int handle, const char* key, const char* value) {
-    lock_guard<mutex> lock(jsonMutex);
-    auto it = jsonMap.find(handle);
-    if (it != jsonMap.end())
-        it->second->SetValue(string(key), string(value));
-}
-
-// --- New Exported Method: ValueAt ---
-// Returns the array element at the given index as a JSON string.
-XPLUGIN_API const char* JSONItem_ValueAt(int handle, int index) {
-    static string result;
-    lock_guard<mutex> lock(jsonMutex);
-    auto it = jsonMap.find(handle);
-    if (it == jsonMap.end())
-        return "";
-    try {
-        result = it->second->ValueAt(index);
-    } catch (const exception &e) {
-        result = e.what();
+// Child
+XPLUGIN_API int JSONItem_Child(int h, const char* k) {
+    lock_guard<mutex> lk(mtx);
+    if (auto p = fetch(h)) {
+        JSONItem* c = new JSONItem(p->Child(k));
+        return makeHandle(c);
     }
-    return result.c_str();
+    return 0;
 }
 
-// --- New Exported Method: RemoveAt ---
-// Removes the array element at the specified index.
-XPLUGIN_API void JSONItem_RemoveAt(int handle, int index) {
-    lock_guard<mutex> lock(jsonMutex);
-    auto it = jsonMap.find(handle);
-    if (it != jsonMap.end())
-        it->second->RemoveAt(index);
+// SetChild
+XPLUGIN_API void JSONItem_SetChild(int h, const char* k, int childHandle) {
+    lock_guard<mutex> lk(mtx);
+    auto parent = fetch(h);
+    auto child  = fetch(childHandle);
+    if (parent && child) parent->SetChild(k, *child);
 }
 
-// Getter for Compact property.
-XPLUGIN_API const char* JSONItem_GetCompact(int handle) {
-    static string result;
-    lock_guard<mutex> lock(jsonMutex);
-    auto it = jsonMap.find(handle);
-    if (it == jsonMap.end())
-        return "false";
-    result = it->second->Compact ? "true" : "false";
-    return result.c_str();
-}
-
-// Setter for Compact property.
-XPLUGIN_API void JSONItem_SetCompact(int handle, bool value) {
-    lock_guard<mutex> lock(jsonMutex);
-    auto it = jsonMap.find(handle);
-    if (it != jsonMap.end())
-        it->second->Compact = value;
-}
-
-// Getter for IndentSpacing property.
-XPLUGIN_API int JSONItem_GetIndentSpacing(int handle) {
-    lock_guard<mutex> lock(jsonMutex);
-    auto it = jsonMap.find(handle);
-    if (it == jsonMap.end())
-        return 0;
-    return it->second->IndentSpacing;
-}
-
-// Setter for IndentSpacing property.
-XPLUGIN_API void JSONItem_SetIndentSpacing(int handle, int value) {
-    lock_guard<mutex> lock(jsonMutex);
-    auto it = jsonMap.find(handle);
-    if (it != jsonMap.end())
-        it->second->IndentSpacing = value;
-}
-
-// Destroys the JSONItem instance.
-XPLUGIN_API bool JSONItem_Destroy(int handle) {
-    lock_guard<mutex> lock(jsonMutex);
-    auto it = jsonMap.find(handle);
-    if (it == jsonMap.end())
-        return false;
+// Destroy
+XPLUGIN_API bool JSONItem_Destroy(int h) {
+    lock_guard<mutex> lk(mtx);
+    auto it = instances.find(h);
+    if (it == instances.end()) return false;
     delete it->second;
-    jsonMap.erase(it);
+    instances.erase(it);
     return true;
 }
 
-// -----------------------------------------------------------------------------
-// Class Definition Structures (for interpreter integration)
-// -----------------------------------------------------------------------------
+// ─────────────────────────────────────────────────────────────────────────────
+// Class definition table
+// ─────────────────────────────────────────────────────────────────────────────
+typedef struct { const char* name; const char* type; void* getter; void* setter; } ClassProperty;
+typedef struct { const char* name; void* funcPtr; int arity; const char* paramTypes[10]; const char* retType; } ClassEntry;
+typedef struct { const char* declaration; } ClassConstant;
 typedef struct {
-    const char* name;
-    const char* type;
-    void* getter;
-    void* setter;
-} ClassProperty;
-
-typedef struct {
-    const char* name;
-    void* funcPtr;
-    int arity;
-    const char* paramTypes[10];
-    const char* retType;
-} ClassEntry;
-
-typedef struct {
-    const char* declaration;
-} ClassConstant;
-
-typedef struct {
-    const char* className;
-    size_t classSize;
-    void* constructor;
-    ClassProperty* properties;
-    size_t propertiesCount;
-    ClassEntry* methods;
-    size_t methodsCount;
-    ClassConstant* constants;
-    size_t constantsCount;
+    const char*     className;
+    size_t          classSize;
+    void*           constructor;
+    ClassProperty*  properties;
+    size_t          propertiesCount;
+    ClassEntry*     methods;
+    size_t          methodsCount;
+    ClassConstant*  constants;
+    size_t          constantsCount;
 } ClassDefinition;
 
-// Standalone getter for the ToString property.
-XPLUGIN_API const char* JSONItem_ToStringGetter(int handle) {
-    lock_guard<mutex> lock(jsonMutex);
-    auto it = jsonMap.find(handle);
-    static string s;
-    if (it != jsonMap.end()) {
-        s = it->second->ToString();
-        return s.c_str();
-    }
-    return "";
-}
-
-static ClassProperty JSONItemProperties[] = {
-    { "Compact", "boolean", (void*)JSONItem_GetCompact, (void*)JSONItem_SetCompact },
+static ClassProperty props[] = {
+    { "Compact",       "boolean", (void*)JSONItem_GetCompact,       (void*)JSONItem_SetCompact },
     { "IndentSpacing", "integer", (void*)JSONItem_GetIndentSpacing, (void*)JSONItem_SetIndentSpacing },
-    { "ToString", "string", (void*)JSONItem_ToStringGetter, nullptr },
-    { "Handle", "integer", (void*)JSONItem_GetHandle, nullptr }
+    { "ToString",      "string",  (void*)JSONItem_ToString,         nullptr },
+    { "Handle",        "integer", (void*)JSONItem_GetHandle,        nullptr },
+    { "Count",         "integer", (void*)JSONItem_Count,            nullptr }
 };
 
-static ClassEntry JSONItemMethods[] = {
-    { "Load", (void*)JSONItem_Load, 2, {"integer", "string"}, "string" },
-    { "Count", (void*)JSONItem_Count, 1, {"integer"}, "integer" },
-    { "HasKey", (void*)JSONItem_HasKey, 2, {"integer", "string"}, "boolean" },
-    { "IsArray", (void*)JSONItem_IsArray, 1, {"integer"}, "boolean" },
-    { "Keys", (void*)JSONItem_Keys, 1, {"integer"}, "string" },
-    { "LastRowIndex", (void*)JSONItem_LastRowIndex, 1, {"integer"}, "integer" },
-    { "Lookup", (void*)JSONItem_Lookup, 3, {"integer", "string", "string"}, "string" },
-    { "Remove", (void*)JSONItem_Remove, 2, {"integer", "string"}, "void" },
-    { "RemoveAll", (void*)JSONItem_RemoveAll, 1, {"integer"}, "void" },
-    { "Add", (void*)JSONItem_Add, 2, {"integer", "string"}, "void" },
-    { "AddAt", (void*)JSONItem_AddAt, 3, {"integer", "integer", "string"}, "void" },
-    { "Value", (void*)JSONItem_Value, 2, {"integer", "string"}, "string" },
-    { "SetValue", (void*)JSONItem_SetValue, 3, {"integer", "string", "string"}, "void" },
-    { "ValueAt", (void*)JSONItem_ValueAt, 2, {"integer", "integer"}, "string" },
-    { "RemoveAt", (void*)JSONItem_RemoveAt, 2, {"integer", "integer"}, "void" },
-    { "Close", (void*)JSONItem_Destroy, 1, {"integer"}, "void" },
-    { "SetChild", (void*)JSONItem_SetChild, 3, {"integer", "string", "integer"}, "void" }
+static ClassEntry methods[] = {
+    { "Load",        (void*)JSONItem_Load,       2, {"integer","string"},           "string"    },
+    { "HasKey",      (void*)JSONItem_HasKey,     2, {"integer","string"},           "boolean"   },
+    { "IsArray",     (void*)JSONItem_IsArray,    1, {"integer"},                    "boolean"   },
+    { "Keys",        (void*)JSONItem_Keys,       1, {"integer"},                    "string"    },
+    { "LastRowIndex",(void*)JSONItem_LastRowIndex,1,{"integer"},                    "integer"   },
+    { "Lookup",      (void*)JSONItem_Lookup,     3, {"integer","string","string"},  "string"    },
+    { "Remove",      (void*)JSONItem_Remove,     2, {"integer","string"},           "void"      },
+    { "RemoveAll",   (void*)JSONItem_RemoveAll,  1, {"integer"},                    "void"      },
+    { "Add",         (void*)JSONItem_Add,        2, {"integer","string"},           "void"      },
+    { "AddAt",       (void*)JSONItem_AddAt,      3, {"integer","integer","string"}, "void"      },
+    { "Value",       (void*)JSONItem_Value,      2, {"integer","string"},           "string"    },
+    { "SetValue",    (void*)JSONItem_SetValue,   3, {"integer","string","string"},  "void"      },
+    { "ValueAt",     (void*)JSONItem_ValueAt,    2, {"integer","integer"},          "string"    },
+    { "RemoveAt",    (void*)JSONItem_RemoveAt,   2, {"integer","integer"},          "void"      },
+    { "Child",       (void*)JSONItem_Child,      2, {"integer","string"},           "JSONItem"  },
+    { "SetChild",    (void*)JSONItem_SetChild,   3, {"integer","string","JSONItem"},"void"      },
+    { "Close",       (void*)JSONItem_Destroy,    1, {"integer"},                    "void"      }
 };
 
-static ClassConstant JSONItemConstants[] = { };
-
-static ClassDefinition JSONItemClass = {
-    "JSONItem",
-    sizeof(JSONItem),
-    (void*)NewJSONItem, // Parameterless constructor.
-    JSONItemProperties,
-    sizeof(JSONItemProperties) / sizeof(ClassProperty),
-    JSONItemMethods,
-    sizeof(JSONItemMethods) / sizeof(ClassEntry),
-    JSONItemConstants,
-    sizeof(JSONItemConstants) / sizeof(ClassConstant)
+static ClassDefinition classDef = {
+    "JSONItem", sizeof(JSONItem),
+    (void*)NewJSONItem,
+    props,   sizeof(props)/sizeof(props[0]),
+    methods, sizeof(methods)/sizeof(methods[0]),
+    nullptr, 0
 };
 
 XPLUGIN_API ClassDefinition* GetClassDefinition() {
-    return &JSONItemClass;
+    return &classDef;
 }
 
 } // extern "C"
 
 #ifdef _WIN32
-BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {
-    return TRUE;
-}
+BOOL APIENTRY DllMain(HMODULE, DWORD, LPVOID) { return TRUE; }
 #endif

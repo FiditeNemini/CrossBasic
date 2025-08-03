@@ -1,3 +1,61 @@
+// ============================================================================
+// CrossBasic Web Application Server
+// Created by The Simulanics AI Team under direction of Matthew A. Combatti
+// https://www.crossbasic.com
+// DISCLAIMER: Simulanics Technologies and CrossBasic are not affiliated with Xojo, Inc.
+// -----------------------------------------------------------------------------
+// Business Source License 1.1 (BUSL-1.1)
+// Copyright (c) 2025 Simulanics Technologies
+//
+// 1. License Grant
+//    Subject to the conditions herein, Licensor grants you a non-exclusive,
+//    worldwide, royalty-free license to:
+//      • Use, copy, modify, and distribute this software, provided that your
+//        use, modification, and distribution do not involve directly selling,
+//        commercializing, or monetizing this software (CrossBasic) or its
+//        direct derivatives.
+//      • Use the software (CrossBasic) freely to develop and distribute your
+//        own software applications, projects, and related products, which may
+//        themselves be sold, licensed, or commercialized without restriction.
+//
+// 2. Rights Reserved
+//    Licensor retains all rights to this software, including but not limited to
+//    intellectual property rights, copyright, trademarks, branding, and patents.
+//    You may not:
+//      • Fork, copy, distribute, sublicense, or resell this software or its
+//        components directly for profit.
+//      • Offer commercial hosting or Software-as-a-Service (SaaS) products
+//        based directly on this software without explicit permission.
+//
+// 3. Attribution
+//    You must clearly include attribution to the original Licensor
+//    (Simulanics Technologies, copyright notice, and license reference) in any
+//    distributions, modifications, or other uses of the software (CrossBasic).
+//    This does not apply to applications, projects, or related products which
+//    you have created or developed using the software.
+//
+// 4. Additional Commercial Licensing
+//    If you wish to use this software in a manner that directly commercializes,
+//    sells, rebrands, forks, or profits directly from this project itself,
+//    you must obtain an explicit commercial license from the Licensor.
+//
+// 5. Trademark and Branding
+//    The Licensor’s trademarks, logos, and branding assets may not be used,
+//    modified, or distributed without explicit written permission.
+//
+// 6. No Warranty
+//    THIS SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//    IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
+//    FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//    LICENSOR BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY ARISING FROM,
+//    OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR ITS USE OR OTHER DEALINGS.
+//
+// For inquiries about commercial licensing or permissions:
+//    Contact: Matthew Combatti <mcombatti@crossbasic.com>
+//    Website: https://www.crossbasic.com
+//
+// By using this software, you accept the terms and conditions of this license.
+
 #include <boost/asio.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/multiprecision/cpp_dec_float.hpp>
@@ -9,6 +67,7 @@
 #include <functional>
 #include <sstream>
 #include <vector>
+#include <cstdlib>   // std::system
 #include <thread>
 #include <memory>
 #include <mutex>
@@ -22,12 +81,13 @@
 #include <cstring>  // For memset
 
 
+
 namespace fs = std::filesystem;
 using boost::asio::ip::tcp;
 using boost::multiprecision::cpp_dec_float_50;
 
 // Global debug flag
-bool DEBUG = false;
+bool DEBUG = true;
 void debugLog(const std::string &msg) {
     if (DEBUG)
         std::cout << msg << std::endl;
@@ -251,8 +311,8 @@ private:
                     std::istream reqStream(&requestBuffer_);
                     std::string raw;
                     std::getline(reqStream, raw, '\0');
-                    debugLog("REQ:\n" + raw);
                     HttpRequest req = parseRequest(raw);
+                    //debugLog("REQ:\n" + raw);
                     // Distinguish between AJAX calls and static file requests.
                     if (req.uri.rfind("/call?", 0) == 0) {
                         HttpResponse res = handleAjaxCall(req);
@@ -344,7 +404,7 @@ private:
         
         std::string ext = full.extension().string();
         std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
-        bool isImage = (ext == ".png" || ext == ".gif" || ext == ".jpg" || ext == ".jpeg");
+        bool isCached = (ext == ".png" || ext == ".gif" || ext == ".jpg" || ext == ".jpeg");
         
         auto self = shared_from_this();
         // Lambda to set the content type header based on file extension.
@@ -373,7 +433,7 @@ private:
         bool clientAcceptsGzip = (req.headers.find("Accept-Encoding") != req.headers.end() &&
                                   req.headers.at("Accept-Encoding").find("gzip") != std::string::npos);
         
-        if (isImage) {
+        if (isCached) {
             // ----------------------------
             // Image file – Use caching and asynchronous I/O.
             // ----------------------------
@@ -543,7 +603,7 @@ private:
         bool keepAlive = (res.headers.find("Connection") != res.headers.end() &&
                           boost::iequals(res.headers.at("Connection"), "keep-alive"));
         auto self = shared_from_this();
-        debugLog("RESP:\n" + *out);
+        //debugLog("RESP:\n" + *out);
         boost::asio::async_write(sock_, boost::asio::buffer(*out),
             [self, out, keepAlive](boost::system::error_code ec, std::size_t /*length*/) {
                 // The shared pointer "out" ensures that the response stays valid until the write completes.
@@ -589,6 +649,7 @@ int main(){
 
         // "hello" function
         registry.registerFunction("hello", [&](auto&) {
+            debugLog("Function Invoked: hello");
             HttpResponse r;
             r.status_code = "200";
             r.status_msg = "OK";
@@ -596,8 +657,10 @@ int main(){
             r.body = R"({"result":"Hello, World!"})";
             return r;
         });
-        // "redirectTest" function
-        registry.registerFunction("redirectTest", [&](auto&) {
+
+        // "redirect" function
+        registry.registerFunction("redirect", [&](auto&) {
+            debugLog("Function Invoked: redirect");
             HttpResponse r;
             r.status_code = "200";
             r.status_msg = "OK";
@@ -605,8 +668,10 @@ int main(){
             r.body = R"({"redirect":"/newpage.html"})";
             return r;
         });
+
         // "calculate" function
         registry.registerFunction("calculate", [&](auto &p) {
+            debugLog("Function Invoked: calculate");
             HttpResponse r;
             r.status_code = "200";
             r.status_msg = "OK";
@@ -623,8 +688,63 @@ int main(){
             return r;
         });
 
+        /*
+        *  COMMAND  “build”  RPC
+        *  ─────────────────
+        *  Expects  ?function=build&code=<url-encoded CrossBasic source>
+        *  ▸ Saves the code to temp.xs
+        *  ▸ Launches  crossbasic --s temp.xs  in a detached process
+        *  ▸ Returns JSON  {"result":"Build started"}
+        */
+        registry.registerFunction("build",
+            [&](const std::map<std::string,std::string>& p) -> HttpResponse
+        {
+            debugLog("Function Invoked: build");
+
+            HttpResponse r;
+            r.status_code = "200";
+            r.status_msg  = "OK";
+            r.headers["Content-Type"] = "application/json";
+
+            try {
+                /* 1️⃣ get the code text */
+                auto it = p.find("code");
+                if (it == p.end())
+                    throw std::runtime_error("Missing 'code' parameter");
+                const std::string& code = it->second;
+
+                /* 2️⃣ write it to   temp.xs  in the server’s cwd */
+                const std::string filename = "temp.xs";
+                {
+                    std::ofstream ofs(filename, std::ios::binary | std::ios::trunc);
+                    if (!ofs) throw std::runtime_error("Unable to create temp.xs");
+                    ofs << code;
+                }
+
+                /* 3️⃣ spawn CrossBasic in its own OS process (non-blocking) */
+            #ifdef _WIN32
+                std::string cmd = "start \"\" \"crossbasic\" --s " + filename;
+            #else
+                std::string cmd = "crossbasic --s " + filename + " &";
+            #endif
+
+                std::thread([cmd]{
+                    std::system(cmd.c_str());   // child runs; this thread just waits
+                }).detach();
+
+                /* 4️⃣ tell the browser we’re good */
+                r.body = R"({"result":"Build started"})";
+            }
+            catch (const std::exception& ex) {
+                r.body = std::string("{\"error\":\"") + ex.what() + "\"}";
+            }
+            r.headers["Content-Length"] = std::to_string(r.body.size());
+            return r;
+        });
+
+
         HttpServer server(ctx, 8080, registry);
-        debugLog("Server listening on port 8080");
+        std::cout << "CrossBasic Application Server is listening for connections on port 8080." << std::endl;
 
         const std::size_t threadCount = std::max(1u, std::thread::hardware_concurrency());
         std::vector<std::thread> threads;

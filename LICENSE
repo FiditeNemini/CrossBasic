@@ -1,24 +1,111 @@
-MIT License
+# CrossBasic Source License (CBSL-1.1)
 
-Copyright (c) 2025 Matthew Combatti
+**Copyright (c) 2025 Simulanics Technologies – Matthew Combatti.**
+**All rights reserved.**
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+---
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+## 1. License Grant
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+Subject to the conditions below, the Licensor (Matthew Combatti) grants you a non-exclusive, worldwide, royalty-free license to:
 
-Human Readable Format:
-Do what you will, we're not responsible for your actions or outcome. 🙏
+**a.** Use, copy, modify, and distribute this software (CrossBasic) and its associated documentation files **non-commercially**, provided that your use, modification, and distribution do not involve directly or substantially indirectly selling, commercializing, or monetizing this software (CrossBasic) or any derivative that includes portions of CrossBasic’s source code.
+
+**b.** Use CrossBasic freely to develop and distribute your own software applications, projects, and related products, which may themselves be sold, licensed, or commercialized without restriction—**provided they do not redistribute, embed, or repackage CrossBasic’s source or compiled binaries in a way that makes CrossBasic a substantial or primary component of the commercial product.** For avoidance of doubt, CrossBasic may not constitute more than 50% of the value, functionality, or code base of the commercial product.
+
+**c.** Include compiled CrossBasic runtime binaries, plugins, or embedded components with your application for runtime use **as long as CrossBasic is not the core feature or bulk of your product** (i.e., your product offers significant value independently of CrossBasic).
+
+---
+
+## 2. Rights Reserved
+
+The Licensor retains all rights to this software, including but not limited to intellectual property rights, copyright, trademarks, and patents.
+
+You may not:
+
+**a.** Fork, copy, distribute, sublicense, host, or resell CrossBasic or any of its components directly for profit (see Section 1.b).
+
+**b.** Offer commercial hosting, Software-as-a-Service (SaaS), or any paid service that provides public access to CrossBasic’s runtime, binaries, or source code—**unless** you have obtained prior written permission from the Licensor.
+*This restriction does not apply to internal use within an organization where CrossBasic is used privately and not exposed to customers or the public.*
+
+**c.** Create, distribute, or sell any derivative that consists primarily of CrossBasic’s source code or compiled binaries, whether in original or modified form, without a separate commercial license.
+
+---
+
+## 3. Attribution
+
+If you distribute or modify CrossBasic under this license, you must include:
+
+* Clear attribution to the original Licensor: **Simulanics Technologies – Matthew Combatti**
+* The following copyright notice:
+  `Copyright (c) 2025 Simulanics Technologies – Matthew Combatti`
+* A copy of or link to this **CBSL-1.1** license text
+
+**This attribution requirement does not apply to independent applications or products created using CrossBasic**, provided they do not redistribute CrossBasic’s source or compiled code.
+
+---
+
+## 4. Commercial Licensing
+
+If you intend to:
+
+* Sell, monetize, fork, rebrand, or commercialize CrossBasic directly
+* Offer public-facing services (e.g., IDEs, platforms, APIs) that use or expose CrossBasic
+* Create and market tools, IDEs, or compilers built on CrossBasic’s codebase
+
+Then you must obtain a commercial license from the Licensor.
+
+**Contact for licensing**:
+Matthew Combatti [mcombatti@crossbasic.com](mailto:mcombatti@crossbasic.com)
+Website: [https://www.crossbasic.com](https://www.crossbasic.com)
+
+---
+
+## 5. Trademarks & Branding
+
+The name **“CrossBasic”**, associated logos, and branding assets are trademarks of Simulanics Technologies.
+They may not be used, modified, or redistributed without **explicit written permission** from the Licensor.
+
+---
+
+## 6. No Warranty
+
+THIS SOFTWARE IS PROVIDED “AS IS” WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT.
+
+IN NO EVENT SHALL THE LICENSOR BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, ARISING FROM OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+---
+
+## 7. Limitation of Liability
+
+IN NO EVENT SHALL THE LICENSOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING BUT NOT LIMITED TO LOSS OF USE, DATA, OR PROFITS; PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND UNDER ANY THEORY OF LIABILITY, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+---
+
+## 8. License Classification
+
+This license is **source-available** and **not** an Open Source license as defined by the Open Source Initiative (OSI).
+It is not compatible with GPL, MIT, Apache, or other OSI-approved licenses.
+
+---
+
+# Human-Readable Summary
+
+* ✅ **Allowed Without Commercial License**
+
+  * Build and sell your own apps using CrossBasic (as long as you don’t sell CrossBasic itself)
+  * Include CrossBasic binaries in your local and external projects (ie written in another language)
+  * Modify or distribute CrossBasic **only for non-commercial** or educational purposes
+  * Use CrossBasic in private/internal business tooling
+
+* ❌ **Prohibited Without a Commercial License**
+
+  * Sell or rebrand CrossBasic or distribute modified versions for profit
+  * Build an IDE or compiler based on CrossBasic and sell it
+  * Provide CrossBasic via public-facing paid services, SaaS, or developer platforms
+  * Use the “CrossBasic” name or logos without permission
+
+* ℹ️ **Attribution Only Needed**
+
+  * When you distribute or modify the CrossBasic source or binaries
+  * Not required for apps you build with CrossBasic's tools, unless they redistribute CrossBasic code.

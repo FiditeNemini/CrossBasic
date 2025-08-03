@@ -1,362 +1,286 @@
-// MemoryBlock.cpp
-// Created by Matthew A Combatti  
-// Simulanics Technologies and Xojo Developers Studio  
-// https://www.simulanics.com  
-// https://www.xojostudio.org  
-// DISCLAIMER: Simulanics Technologies and Xojo Developers Studio are not affiliated with Xojo, Inc.
-// -----------------------------------------------------------------------------  
-// Copyright (c) 2025 Simulanics Technologies and Xojo Developers Studio  
-//  
-// Permission is hereby granted, free of charge, to any person obtaining a copy  
-// of this software and associated documentation files (the "Software"), to deal  
-// in the Software without restriction, including without limitation the rights  
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell  
-// copies of the Software, and to permit persons to whom the Software is  
-// furnished to do so, subject to the following conditions:  
-//  
-// The above copyright notice and this permission notice shall be included in all  
-// copies or substantial portions of the Software.  
-//  
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR  
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,  
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE  
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER  
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,  
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE  
-// SOFTWARE.
-// ----------------------------------------------------------------------------- 
+/*
 
-#include <iostream>
-#include <unordered_map>
+  MemoryBlock.cpp
+  CrossBasic Plugin: MemoryBlock                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      4r
+ 
+  Copyright (c) 2025 Simulanics Technologies – Matthew Combatti
+  All rights reserved.
+ 
+  Licensed under the CrossBasic Source License (CBSL-1.1).
+  You may not use this file except in compliance with the License.
+  You may obtain a copy of the License at:
+  https://www.crossbasic.com/license
+ 
+  SPDX-License-Identifier: CBSL-1.1
+  
+  Author:
+    The AI Team under direction of Matthew Combatti <mcombatti@crossbasic.com>
+    
+*/
+
 #include <vector>
 #include <cstring>
+#include <unordered_map>
 #include <mutex>
 #include <atomic>
+#include <string>      
 
 #ifdef _WIN32
+  #ifndef NOMINMAX
+    #define NOMINMAX
+  #endif
+  #define WIN32_LEAN_AND_MEAN
   #include <windows.h>
   #define XPLUGIN_API __declspec(dllexport)
 #else
   #define XPLUGIN_API __attribute__((visibility("default")))
 #endif
 
-//------------------------------------------------------------------------------
-// MemoryBlock Class Declaration
-// This class encapsulates a memory block stored in a std::vector<char>.
-//------------------------------------------------------------------------------
+// ─────────────────────────────────────────────────────────────────────────────
+// MemoryBlock – internal class
+// ─────────────────────────────────────────────────────────────────────────────
 class MemoryBlock {
 public:
+    int               Handle;
     std::vector<char> block;
 
-    MemoryBlock() { }
+    MemoryBlock() : Handle(0) {}
 
-    // Resizes the memory block to newSize.
+    // Resize the memory block.
     void Resize(int newSize) {
-        if (newSize > 0)
-            block.resize(newSize);
+        if (newSize < 0) return;
+        block.resize(static_cast<size_t>(newSize));
     }
 
-    // Returns the current size of the memory block.
-    int Size() {
-        return static_cast<int>(block.size());
-    }
+    // Basic info
+    int Size() const { return static_cast<int>(block.size()); }
 
-    // Reads a single byte at the given offset.
-    int ReadByte(int offset) {
-        if (offset < 0 || offset >= Size()) return -1;
-        return static_cast<unsigned char>(block[offset]);
-    }
+    // ── Reads ────────────────────────────────────────────────────────────────
+    int    ReadByte  (int o) const;
+    int    ReadShort (int o) const;
+    int    ReadLong  (int o) const;
+    double ReadDouble(int o) const;
+    const char* ReadString(int o, int len) const;
 
-    // Reads a 2-byte short integer at the given offset.
-    int ReadShort(int offset) {
-        if (offset < 0 || offset + 1 >= Size()) return -1;
-        short value;
-        std::memcpy(&value, &block[offset], sizeof(value));
-        return value;
-    }
+    // ── Writes ───────────────────────────────────────────────────────────────
+    void WriteByte  (int o, int v);
+    void WriteShort (int o, int v);
+    void WriteLong  (int o, int v);
+    void WriteDouble(int o, double v);
+    void WriteString(int o, const char* v);
 
-    // Reads a 4-byte long integer at the given offset.
-    int ReadLong(int offset) {
-        if (offset < 0 || offset + 3 >= Size()) return -1;
-        int value;
-        std::memcpy(&value, &block[offset], sizeof(value));
-        return value;
-    }
-
-    // Reads an 8-byte double at the given offset.
-    double ReadDouble(int offset) {
-        if (offset < 0 || offset + 7 >= Size()) return -1.0;
-        double value;
-        std::memcpy(&value, &block[offset], sizeof(value));
-        return value;
-    }
-
-    // Reads a string of the specified length starting at offset.
-    const char* ReadString(int offset, int length) {
-        static thread_local std::string buffer;
-        if (offset < 0 || length < 0 || offset + length > Size()) return "";
-        buffer.assign(block.begin() + offset, block.begin() + offset + length);
-        return buffer.c_str();
-    }
-
-    // Writes a single byte (0-255) at the given offset.
-    void WriteByte(int offset, int value) {
-        if (offset < 0 || offset >= Size()) return;
-        block[offset] = static_cast<char>(value);
-    }
-
-    // Writes a 2-byte short integer at the given offset.
-    void WriteShort(int offset, int value) {
-        if (offset < 0 || offset + 1 >= Size()) return;
-        short shortVal = static_cast<short>(value);
-        std::memcpy(&block[offset], &shortVal, sizeof(shortVal));
-    }
-
-    // Writes a 4-byte long integer at the given offset.
-    void WriteLong(int offset, int value) {
-        if (offset < 0 || offset + 3 >= Size()) return;
-        std::memcpy(&block[offset], &value, sizeof(value));
-    }
-
-    // Writes an 8-byte double at the given offset.
-    void WriteDouble(int offset, double value) {
-        if (offset < 0 || offset + 7 >= Size()) return;
-        std::memcpy(&block[offset], &value, sizeof(value));
-    }
-
-    // Writes a string at the given offset.
-    void WriteString(int offset, const char* value) {
-        int len = std::strlen(value);
-        if (offset < 0 || offset + len > Size()) return;
-        std::memcpy(&block[offset], value, len);
-    }
-
-    // Copies 'length' bytes from the source memory block (srcBlock) starting at srcOffset 
-    // into this memory block at destOffset.
-    void CopyData(int destOffset, MemoryBlock* srcBlock, int srcOffset, int length) {
-        if (!srcBlock) return;
-        if (destOffset < 0 || srcOffset < 0) return;
-        if (destOffset + length > Size() || srcOffset + length > srcBlock->Size()) return;
-        std::memcpy(&block[destOffset], &srcBlock->block[srcOffset], length);
-    }
+    // ── Bulk copy ────────────────────────────────────────────────────────────
+    void CopyData(int destOffset, MemoryBlock* src, int srcOffset, int len);
 };
 
-//------------------------------------------------------------------------------
-// Global Instance Management for MemoryBlock Objects
-//------------------------------------------------------------------------------
-static std::mutex memoryMutex;
-static std::unordered_map<int, MemoryBlock*> memoryBlockMap;
-static std::atomic<int> currentMemoryBlockHandle(1); // Unique handle generator
-
-//------------------------------------------------------------------------------
-// Constructor: Creates a new MemoryBlock instance and returns its unique handle.
-//------------------------------------------------------------------------------
-extern "C" XPLUGIN_API int Constructor() {
-    int handle = currentMemoryBlockHandle.fetch_add(1);
-    MemoryBlock* newBlock = new MemoryBlock();
-    {
-        std::lock_guard<std::mutex> lock(memoryMutex);
-        memoryBlockMap[handle] = newBlock;
-    }
-    return handle;
+// ── Read helpers ─────────────────────────────────────────────────────────────
+inline int MemoryBlock::ReadByte(int o) const {
+    return (o < 0 || o >= Size()) ? -1 : static_cast<unsigned char>(block[static_cast<size_t>(o)]);
 }
 
-//------------------------------------------------------------------------------
-// Instance Methods
-//------------------------------------------------------------------------------
-extern "C" XPLUGIN_API int MemoryBlock_Size(int handle) {
-    std::lock_guard<std::mutex> lock(memoryMutex);
-    auto it = memoryBlockMap.find(handle);
-    return (it != memoryBlockMap.end()) ? it->second->Size() : -1;
+inline int MemoryBlock::ReadShort(int o) const {
+    if (o < 0 || o + 1 >= Size()) return -1;
+    short v; std::memcpy(&v, &block[static_cast<size_t>(o)], sizeof(v));
+    return v;
 }
 
-extern "C" XPLUGIN_API void MemoryBlock_Resize(int handle, int newSize) {
-    if (newSize <= 0) return;
-    std::lock_guard<std::mutex> lock(memoryMutex);
-    auto it = memoryBlockMap.find(handle);
-    if (it != memoryBlockMap.end()) {
-        it->second->Resize(newSize);
-    }
+inline int MemoryBlock::ReadLong(int o) const {
+    if (o < 0 || o + 3 >= Size()) return -1;
+    int v; std::memcpy(&v, &block[static_cast<size_t>(o)], sizeof(v));
+    return v;
 }
 
-extern "C" XPLUGIN_API void MemoryBlock_Destroy(int handle) {
-    std::lock_guard<std::mutex> lock(memoryMutex);
-    auto it = memoryBlockMap.find(handle);
-    if (it != memoryBlockMap.end()) {
-        delete it->second;
-        memoryBlockMap.erase(it);
-    }
+inline double MemoryBlock::ReadDouble(int o) const {
+    if (o < 0 || o + 7 >= Size()) return -1.0;
+    double v; std::memcpy(&v, &block[static_cast<size_t>(o)], sizeof(v));
+    return v;
 }
 
-extern "C" XPLUGIN_API int MemoryBlock_ReadByte(int handle, int offset) {
-    std::lock_guard<std::mutex> lock(memoryMutex);
-    auto it = memoryBlockMap.find(handle);
-    return (it != memoryBlockMap.end()) ? it->second->ReadByte(offset) : -1;
+inline const char* MemoryBlock::ReadString(int o, int len) const {
+    static thread_local std::string buf;
+    if (o < 0 || len < 0 || o + len > Size()) return "";
+    buf.assign(block.begin() + o, block.begin() + o + len);
+    return buf.c_str();
 }
 
-extern "C" XPLUGIN_API int MemoryBlock_ReadShort(int handle, int offset) {
-    std::lock_guard<std::mutex> lock(memoryMutex);
-    auto it = memoryBlockMap.find(handle);
-    return (it != memoryBlockMap.end()) ? it->second->ReadShort(offset) : -1;
+// ── Write helpers ────────────────────────────────────────────────────────────
+inline void MemoryBlock::WriteByte(int o, int v) {
+    if (o < 0 || o >= Size()) return;
+    block[static_cast<size_t>(o)] = static_cast<char>(v);
 }
 
-extern "C" XPLUGIN_API int MemoryBlock_ReadLong(int handle, int offset) {
-    std::lock_guard<std::mutex> lock(memoryMutex);
-    auto it = memoryBlockMap.find(handle);
-    return (it != memoryBlockMap.end()) ? it->second->ReadLong(offset) : -1;
+inline void MemoryBlock::WriteShort(int o, int v) {
+    if (o < 0 || o + 1 >= Size()) return;
+    short s = static_cast<short>(v);
+    std::memcpy(&block[static_cast<size_t>(o)], &s, sizeof(s));
 }
 
-extern "C" XPLUGIN_API double MemoryBlock_ReadDouble(int handle, int offset) {
-    std::lock_guard<std::mutex> lock(memoryMutex);
-    auto it = memoryBlockMap.find(handle);
-    return (it != memoryBlockMap.end()) ? it->second->ReadDouble(offset) : -1.0;
+inline void MemoryBlock::WriteLong(int o, int v) {
+    if (o < 0 || o + 3 >= Size()) return;
+    std::memcpy(&block[static_cast<size_t>(o)], &v, sizeof(v));
 }
 
-extern "C" XPLUGIN_API const char* MemoryBlock_ReadString(int handle, int offset, int length) {
-    std::lock_guard<std::mutex> lock(memoryMutex);
-    auto it = memoryBlockMap.find(handle);
-    return (it != memoryBlockMap.end()) ? it->second->ReadString(offset, length) : "";
+inline void MemoryBlock::WriteDouble(int o, double v) {
+    if (o < 0 || o + 7 >= Size()) return;
+    std::memcpy(&block[static_cast<size_t>(o)], &v, sizeof(v));
 }
 
-extern "C" XPLUGIN_API void MemoryBlock_WriteByte(int handle, int offset, int value) {
-    std::lock_guard<std::mutex> lock(memoryMutex);
-    auto it = memoryBlockMap.find(handle);
-    if (it != memoryBlockMap.end())
-        it->second->WriteByte(offset, value);
+inline void MemoryBlock::WriteString(int o, const char* v) {
+    if (!v) return;
+    int len = static_cast<int>(std::strlen(v));
+    if (o < 0 || o + len > Size()) return;
+    std::memcpy(&block[static_cast<size_t>(o)], v, static_cast<size_t>(len));
 }
 
-extern "C" XPLUGIN_API void MemoryBlock_WriteShort(int handle, int offset, int value) {
-    std::lock_guard<std::mutex> lock(memoryMutex);
-    auto it = memoryBlockMap.find(handle);
-    if (it != memoryBlockMap.end())
-        it->second->WriteShort(offset, value);
+// ── Bulk copy ────────────────────────────────────────────────────────────────
+inline void MemoryBlock::CopyData(int destOffset, MemoryBlock* src, int srcOffset, int len) {
+    if (!src) return;
+    if (destOffset < 0 || srcOffset < 0) return;
+    if (destOffset + len > Size() || srcOffset + len > src->Size()) return;
+    std::memcpy(&block[static_cast<size_t>(destOffset)],
+                &src->block[static_cast<size_t>(srcOffset)],
+                static_cast<size_t>(len));
 }
 
-extern "C" XPLUGIN_API void MemoryBlock_WriteLong(int handle, int offset, int value) {
-    std::lock_guard<std::mutex> lock(memoryMutex);
-    auto it = memoryBlockMap.find(handle);
-    if (it != memoryBlockMap.end())
-        it->second->WriteLong(offset, value);
+// ─────────────────────────────────────────────────────────────────────────────
+// Handle ↔ instance bookkeeping
+// ─────────────────────────────────────────────────────────────────────────────
+static std::mutex                               memMtx;
+static std::unordered_map<int, MemoryBlock*>    blocks;
+static std::atomic<int>                         nextHandle(1);
+
+static inline MemoryBlock* fetch(int h) {
+    auto it = blocks.find(h);
+    return (it == blocks.end()) ? nullptr : it->second;
 }
 
-extern "C" XPLUGIN_API void MemoryBlock_WriteDouble(int handle, int offset, double value) {
-    std::lock_guard<std::mutex> lock(memoryMutex);
-    auto it = memoryBlockMap.find(handle);
-    if (it != memoryBlockMap.end())
-        it->second->WriteDouble(offset, value);
+// ─────────────────────────────────────────────────────────────────────────────
+// C-linkage API – exported to the VM
+// ─────────────────────────────────────────────────────────────────────────────
+extern "C" {
+
+// Constructor
+XPLUGIN_API int NewMemoryBlock() {
+    int h = nextHandle.fetch_add(1);
+    auto* b = new MemoryBlock();
+    b->Handle = h;
+    std::lock_guard<std::mutex> lk(memMtx);
+    blocks[h] = b;
+    return h;
 }
 
-extern "C" XPLUGIN_API void MemoryBlock_WriteString(int handle, int offset, const char* value) {
-    std::lock_guard<std::mutex> lock(memoryMutex);
-    auto it = memoryBlockMap.find(handle);
-    if (it != memoryBlockMap.end())
-        it->second->WriteString(offset, value);
+// Handle (read-only)
+XPLUGIN_API int MemoryBlock_GetHandle(int h) { return h; }
+
+// Size
+XPLUGIN_API int MemoryBlock_Size(int h) {
+    std::lock_guard<std::mutex> lk(memMtx);
+    if (auto* p = fetch(h)) return p->Size();
+    return -1;
 }
 
-// Renamed from "CopyMemory" to "CopyData" to avoid conflict with Windows macros.
-extern "C" XPLUGIN_API void MemoryBlock_CopyData(int destHandle, int destOffset, int srcHandle, int srcOffset, int length) {
-    std::lock_guard<std::mutex> lock(memoryMutex);
-    auto destIt = memoryBlockMap.find(destHandle);
-    auto srcIt = memoryBlockMap.find(srcHandle);
-    if (destIt != memoryBlockMap.end() && srcIt != memoryBlockMap.end()) {
-        destIt->second->CopyData(destOffset, srcIt->second, srcOffset, length);
-    }
+// Resize
+XPLUGIN_API void MemoryBlock_Resize(int h, int newSize) {
+    std::lock_guard<std::mutex> lk(memMtx);
+    if (auto* p = fetch(h)) p->Resize(newSize);
 }
 
-//------------------------------------------------------------------------------
-// Class Definition Structures
-//------------------------------------------------------------------------------
+// Destroy
+XPLUGIN_API bool MemoryBlock_Destroy(int h) {
+    std::lock_guard<std::mutex> lk(memMtx);
+    auto it = blocks.find(h);
+    if (it == blocks.end()) return false;
+    delete it->second;
+    blocks.erase(it);
+    return true;
+}
+
+// ── Reads ───────────────────────────────────────────────────────────────────
+XPLUGIN_API int    MemoryBlock_ReadByte  (int h, int o) { std::lock_guard<std::mutex> lk(memMtx); auto* p = fetch(h); return p ? p->ReadByte(o)   : -1; }
+XPLUGIN_API int    MemoryBlock_ReadShort (int h, int o) { std::lock_guard<std::mutex> lk(memMtx); auto* p = fetch(h); return p ? p->ReadShort(o)  : -1; }
+XPLUGIN_API int    MemoryBlock_ReadLong  (int h, int o) { std::lock_guard<std::mutex> lk(memMtx); auto* p = fetch(h); return p ? p->ReadLong(o)   : -1; }
+XPLUGIN_API double MemoryBlock_ReadDouble(int h, int o) { std::lock_guard<std::mutex> lk(memMtx); auto* p = fetch(h); return p ? p->ReadDouble(o) : -1.0; }
+XPLUGIN_API const char* MemoryBlock_ReadString(int h, int o, int l) {
+    std::lock_guard<std::mutex> lk(memMtx);
+    auto* p = fetch(h);
+    return p ? p->ReadString(o, l) : "";
+}
+
+// ── Writes ──────────────────────────────────────────────────────────────────
+XPLUGIN_API void MemoryBlock_WriteByte  (int h, int o, int v)       { std::lock_guard<std::mutex> lk(memMtx); auto* p = fetch(h); if (p) p->WriteByte(o, v); }
+XPLUGIN_API void MemoryBlock_WriteShort (int h, int o, int v)       { std::lock_guard<std::mutex> lk(memMtx); auto* p = fetch(h); if (p) p->WriteShort(o, v); }
+XPLUGIN_API void MemoryBlock_WriteLong  (int h, int o, int v)       { std::lock_guard<std::mutex> lk(memMtx); auto* p = fetch(h); if (p) p->WriteLong(o, v); }
+XPLUGIN_API void MemoryBlock_WriteDouble(int h, int o, double v)    { std::lock_guard<std::mutex> lk(memMtx); auto* p = fetch(h); if (p) p->WriteDouble(o, v); }
+XPLUGIN_API void MemoryBlock_WriteString(int h, int o, const char* s){ std::lock_guard<std::mutex> lk(memMtx); auto* p = fetch(h); if (p) p->WriteString(o, s); }
+
+// CopyData
+XPLUGIN_API void MemoryBlock_CopyData(int destH, int destOff, int srcH, int srcOff, int len) {
+    std::lock_guard<std::mutex> lk(memMtx);
+    auto* dest = fetch(destH);
+    auto* src  = fetch(srcH);
+    if (dest && src) dest->CopyData(destOff, src, srcOff, len);
+}
+
+} // extern "C"
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Class definition tables
+// ─────────────────────────────────────────────────────────────────────────────
+typedef struct { const char* name; const char* type; void* getter; void* setter; } ClassProperty;
+typedef struct { const char* name; void* funcPtr; int arity; const char* paramTypes[10]; const char* retType; } ClassEntry;
+typedef struct { const char* declaration; } ClassConstant;
 typedef struct {
-    const char* name;
-    const char* type;
-    void* getter;
-    void* setter;
-} ClassProperty;
-
-typedef struct {
-    const char* name;
-    void* funcPtr;
-    int arity;
-    const char* paramTypes[10];
-    const char* retType;
-} ClassEntry;
-
-typedef struct {
-    const char* declaration;
-} ClassConstant;
-
-typedef struct {
-    const char* className;
-    size_t classSize;
-    void* constructor;
-    ClassProperty* properties;
-    size_t propertiesCount;
-    ClassEntry* methods;
-    size_t methodsCount;
-    ClassConstant* constants;
-    size_t constantsCount;
+    const char*     className;
+    size_t          classSize;
+    void*           constructor;
+    ClassProperty*  properties;
+    size_t          propertiesCount;
+    ClassEntry*     methods;
+    size_t          methodsCount;
+    ClassConstant*  constants;
+    size_t          constantsCount;
 } ClassDefinition;
 
-//------------------------------------------------------------------------------
-// Define the class properties for MemoryBlock.
-// Expose a read-only "Size" property.
-static ClassProperty MemoryBlockProperties[] = {
-    { "Size", "integer", (void*)MemoryBlock_Size, nullptr }
+// Properties
+static ClassProperty props[] = {
+    { "Handle", "integer", (void*)MemoryBlock_GetHandle, nullptr },
+    { "Size",   "integer", (void*)MemoryBlock_Size,      nullptr }
 };
 
-//------------------------------------------------------------------------------
-// Define the class methods for MemoryBlock.
-// Note: The copy function is named "CopyData" to avoid name conflicts.
-static ClassEntry MemoryBlockMethods[] = {
-    { "Resize", (void*)MemoryBlock_Resize, 2, {"integer", "integer"}, "void" },
-    { "Close", (void*)MemoryBlock_Destroy, 1, {"integer"}, "boolean" },
-    { "ReadByte", (void*)MemoryBlock_ReadByte, 2, {"integer", "integer"}, "integer" },
-    { "ReadShort", (void*)MemoryBlock_ReadShort, 2, {"integer", "integer"}, "integer" },
-    { "ReadLong", (void*)MemoryBlock_ReadLong, 2, {"integer", "integer"}, "integer" },
-    { "ReadDouble", (void*)MemoryBlock_ReadDouble, 2, {"integer", "integer"}, "double" },
-    { "ReadString", (void*)MemoryBlock_ReadString, 3, {"integer", "integer", "integer"}, "string" },
-    { "WriteByte", (void*)MemoryBlock_WriteByte, 3, {"integer", "integer", "integer"}, "void" },
-    { "WriteShort", (void*)MemoryBlock_WriteShort, 3, {"integer", "integer", "integer"}, "void" },
-    { "WriteLong", (void*)MemoryBlock_WriteLong, 3, {"integer", "integer", "integer"}, "void" },
-    { "WriteDouble", (void*)MemoryBlock_WriteDouble, 3, {"integer", "integer", "double"}, "void" },
-    { "WriteString", (void*)MemoryBlock_WriteString, 3, {"integer", "integer", "string"}, "void" },
-    { "CopyData", (void*)MemoryBlock_CopyData, 5, {"integer", "integer", "integer", "integer", "integer"}, "void" }
+// Methods
+static ClassEntry methods[] = {
+    { "Resize",     (void*)MemoryBlock_Resize,     2, {"integer","integer"},                            "void"    },
+    { "Close",      (void*)MemoryBlock_Destroy,    1, {"integer"},                                      "boolean" },
+    { "ReadByte",   (void*)MemoryBlock_ReadByte,   2, {"integer","integer"},                            "integer" },
+    { "ReadShort",  (void*)MemoryBlock_ReadShort,  2, {"integer","integer"},                            "integer" },
+    { "ReadLong",   (void*)MemoryBlock_ReadLong,   2, {"integer","integer"},                            "integer" },
+    { "ReadDouble", (void*)MemoryBlock_ReadDouble, 2, {"integer","integer"},                            "double"  },
+    { "ReadString", (void*)MemoryBlock_ReadString, 3, {"integer","integer","integer"},                  "string"  },
+    { "WriteByte",  (void*)MemoryBlock_WriteByte,  3, {"integer","integer","integer"},                  "void"    },
+    { "WriteShort", (void*)MemoryBlock_WriteShort, 3, {"integer","integer","integer"},                  "void"    },
+    { "WriteLong",  (void*)MemoryBlock_WriteLong,  3, {"integer","integer","integer"},                  "void"    },
+    { "WriteDouble",(void*)MemoryBlock_WriteDouble,3, {"integer","integer","double"},                   "void"    },
+    { "WriteString",(void*)MemoryBlock_WriteString,3, {"integer","integer","string"},                   "void"    },
+    { "CopyData",   (void*)MemoryBlock_CopyData,   5, {"integer","integer","MemoryBlock","integer","integer"}, "void" }
 };
 
-// No class constants defined.
-static ClassConstant MemoryBlockConstants[] = {};
+// No constants
+static ClassConstant constants[] = {};
 
-//------------------------------------------------------------------------------
-// Complete class definition for MemoryBlock.
-//------------------------------------------------------------------------------
-static ClassDefinition MemoryBlockClass = {
-    "MemoryBlock",                                      // className
-    sizeof(MemoryBlock),                                // classSize
-    (void*)Constructor,                                 // constructor (named "Constructor")
-    MemoryBlockProperties,                              // properties
-    sizeof(MemoryBlockProperties) / sizeof(ClassProperty), // propertiesCount
-    MemoryBlockMethods,                                 // methods
-    sizeof(MemoryBlockMethods) / sizeof(ClassEntry),    // methodsCount
-    MemoryBlockConstants,                               // constants
-    sizeof(MemoryBlockConstants) / sizeof(ClassConstant) // constantsCount
+// Class definition
+static ClassDefinition classDef = {
+    "MemoryBlock",
+    sizeof(MemoryBlock),
+    (void*)NewMemoryBlock,
+    props,   sizeof(props)   / sizeof(ClassProperty),
+    methods, sizeof(methods) / sizeof(ClassEntry),
+    constants, sizeof(constants) / sizeof(ClassConstant)
 };
 
-//------------------------------------------------------------------------------
-// Exported function to return the class definition.
-//------------------------------------------------------------------------------
-extern "C" XPLUGIN_API ClassDefinition* GetClassDefinition() {
-    return &MemoryBlockClass;
-}
+// Export definition
+extern "C" XPLUGIN_API ClassDefinition* GetClassDefinition() { return &classDef; }
 
+// Windows DLL entry
 #ifdef _WIN32
-extern "C" BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {
-    switch(ul_reason_for_call) {
-        case DLL_PROCESS_ATTACH:
-        case DLL_THREAD_ATTACH:
-        case DLL_THREAD_DETACH:
-        case DLL_PROCESS_DETACH:
-            break;
-    }
-    return TRUE;
-}
+BOOL APIENTRY DllMain(HMODULE, DWORD, LPVOID) { return TRUE; }
 #endif

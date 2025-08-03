@@ -1,31 +1,43 @@
+// -----------------------------------------------------------------------------
+// Demo: Overloaded Constructors and Variant Arrays in CrossBasic
+// This script demonstrates class overloading, instance property manipulation,
+// and storing class instances inside Variant arrays for polymorphic handling.
+// -----------------------------------------------------------------------------
+
+// Define a class representing a pair of values
 Class Pair
+  // Properties for left and right values
   Dim LeftValue As Variant
   Dim RightValue As Variant
 
+  // Default constructor (does nothing by default)
   Sub Constructor()
-    //Main Constructor
+    // Main Constructor
   End Sub
 
-  //Overloaded Constructor
-  Sub Constructor( leftValue As Variant, rightValue As Variant )
-    self.LeftValue = leftValue
-    self.RightValue = rightValue
+  // Overloaded constructor to initialize left and right values directly
+  Sub Constructor(leftValue As Variant, rightValue As Variant)
+    Self.LeftValue = leftValue
+    Self.RightValue = rightValue
   End Sub
 End Class
 
-var p as new pair
+// Create a Pair instance and assign values manually
+Var p As New Pair
 p.LeftValue = "hello "
 p.RightValue = "world."
-print(p.LeftValue + p.RightValue)
+Print(p.LeftValue + p.RightValue)  // Output: hello world.
 
-var c as new Pair
-c.constructor(30, 40)
-print(str(c.leftvalue))
-print(str(c.rightvalue))
+// Create another Pair using the overloaded constructor
+Var c As New Pair
+c.Constructor(30, 40)
+Print(Str(c.LeftValue))   // Output: 30
+Print(Str(c.RightValue))  // Output: 40
 
-var vpairs() as Variant
-vpairs.add(p)
-vpairs.add(c)
+// Store both Pair instances in a Variant array
+Var vpairs() As Variant
+vpairs.Add(p)
+vpairs.Add(c)
 
-//Automatic Typecasting of objects
-print(vpairs(0).LeftValue)
+// Access properties through the Variant array (auto-unboxing)
+Print(vpairs(0).LeftValue)  // Output: hello 

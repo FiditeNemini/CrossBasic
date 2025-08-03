@@ -1,0 +1,47 @@
+{
+    "name": "CrossBasic IDE",
+    "short_name": "CrossBasic IDE",
+    "description": "CrossBasic IDE",
+    "scope": ".",
+    "start_url": ".",
+    "display": "fullscreen",
+    "orientation": "any",
+    "theme_color": "#333333",
+    "background_color": "#222222",
+    "type": "privileged",
+  
+    "icons": [
+      { "src": "img/slogo-48.png",  "type": "image/png", "sizes": "48x48" },
+      { "src": "img/slogo-96.png",  "type": "image/png", "sizes": "96x96" },
+      { "src": "img/slogo-144.png", "type": "image/png", "sizes": "144x144" },
+      { "src": "img/slogo-192.png", "type": "image/png", "sizes": "192x192" },
+      { "src": "img/slogo-512.png", "type": "image/png", "sizes": "512x512" }
+    ],
+  
+    "screenshots": [
+      {
+        "src": "img/desktop-screenshot-1280x720.png",
+        "sizes": "1280x720",
+        "type": "image/png",
+        "form_factor": "wide",
+        "label": "CrossBasic IDE on Desktop"
+      },
+      {
+        "src": "img/mobile-screenshot-640x1136.png",
+        "sizes": "640x1136",
+        "type": "image/png",
+        "form_factor": "narrow",
+        "label": "CrossBasic IDE on Mobile"
+      }
+    ],
+  
+    "permissions": {
+      "audio-capture":      { "description": "Audio capture" },
+      "speech-recognition": { "description": "Speech recognition" },
+      "video-capture":      { "description": "Use camera via getUserMedia()" },
+      "browser":            { "description": "Embed an iframe browser" },
+      "camera":             { "description": "Camera capture" },
+      "geolocation":        { "description": "GPS location" }
+    }
+  }
+  

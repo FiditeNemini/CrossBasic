@@ -1,0 +1,26 @@
+// crossbasicdll.rc
+#include <windows.h>
+
+1 VERSIONINFO
+FILEVERSION 1,2,0,0
+PRODUCTVERSION 1,2,0,0
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904B0"
+        BEGIN
+            VALUE "CompanyName", "Simulanics Technologies"
+            VALUE "FileDescription", "CrossBasic Compiler and VM"
+            VALUE "FileVersion", "1.2.0.0"
+            VALUE "InternalName", "CrossBasic"
+            VALUE "LegalCopyright", "© 2025 Simulanics Technologies"
+            VALUE "OriginalFilename", "crossbasic.dll"
+            VALUE "ProductName", "CrossBasic"
+            VALUE "ProductVersion", "1.2.0.0-beta"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x0409, 1200
+    END
+END

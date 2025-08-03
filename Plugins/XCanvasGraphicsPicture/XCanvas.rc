@@ -1,0 +1,4 @@
+#include <windows.h>
+
+// same manifest
+1 RT_MANIFEST "XCanvas.manifest"

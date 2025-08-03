@@ -1,0 +1,1 @@
+g++ -s -static -m64 -municode -std=c++17 -static-libgcc -static-libstdc++ -O3 -march=native -mtune=native sandbox.cpp -luserenv -ladvapi32 -lole32 -o sandbox.exe

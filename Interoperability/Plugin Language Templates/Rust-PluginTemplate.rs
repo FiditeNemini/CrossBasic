@@ -1,9 +1,5 @@
 // lib.rs
 //
-// PluginTemplate converted from C++ to Rust
-// Created by Matthew A Combatti
-// Simulanics Technologies and Xojo Developers Studio
-//
 // Build commands:
 // Windows: cargo build --release --target x86_64-pc-windows-msvc
 // Linux:   cargo build --release --target x86_64-unknown-linux-gnu
