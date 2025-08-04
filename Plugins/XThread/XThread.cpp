@@ -39,6 +39,8 @@
 #include <chrono>
 #include <random>
 #include <iostream>
+#include <cstring> // for strdup on POSIX
+
 
 #ifdef _WIN32
   #include <windows.h>

@@ -2,8 +2,8 @@
 setlocal
 
 :: Compile resource file
-windres ./CrossBasic/crossbasic.rc -O coff -o ./CrossBasic/crossbasic.res
-windres ./CrossBasic/crossbasicdll.rc -O coff -o ./CrossBasic/crossbasicdll.res
+windres ./CrossBasic-SRC/crossbasic.rc -O coff -o ./CrossBasic-SRC/crossbasic.res
+windres ./CrossBasic-SRC/crossbasicdll.rc -O coff -o ./CrossBasic-SRC/crossbasicdll.res
 if %ERRORLEVEL% NEQ 0 (
     echo Resource compilation failed! Check crossbasic.rc for errors.
     exit /b %ERRORLEVEL%
@@ -12,11 +12,11 @@ if %ERRORLEVEL% NEQ 0 (
 :: Compile crossbasic.cpp with metadata
 
 :: Console
-g++ -s -static -m64 -o crossbasic.exe ./CrossBasic/crossbasic.cpp ./CrossBasic/crossbasic.res -Lc:/crossbasicdevkit/x86_64-w64-mingw32/lib/libffix64 -lffi -static-libgcc -static-libstdc++ -O3 -march=native -mtune=native 2> error.log
+g++ -s -static -m64 -o crossbasic.exe ./CrossBasic-SRC/crossbasic.cpp ./CrossBasic-SRC/crossbasic.res -Lc:/crossbasicdevkit/x86_64-w64-mingw32/lib/libffix64 -lffi -static-libgcc -static-libstdc++ -O3 -march=native -mtune=native 2> error.log
 :: Window
-g++ -s -static -m64 -o crossbasicw.exe ./CrossBasic/crossbasic.cpp ./CrossBasic/crossbasic.res -Lc:/crossbasicdevkit/x86_64-w64-mingw32/lib/libffix64 -lffi -static-libgcc -static-libstdc++ -O3 -march=native -mtune=native -Wl,--subsystem,windows 2> error.log
+g++ -s -static -m64 -o crossbasicw.exe ./CrossBasic-SRC/crossbasic.cpp ./CrossBasic-SRC/crossbasic.res -Lc:/crossbasicdevkit/x86_64-w64-mingw32/lib/libffix64 -lffi -static-libgcc -static-libstdc++ -O3 -march=native -mtune=native -Wl,--subsystem,windows 2> error.log
 :: Library
-g++ -s -shared -DBUILD_SHARED -static -m64 -o crossbasic.dll ./CrossBasic/crossbasic.cpp ./CrossBasic/crossbasicdll.res -Lc:/crossbasicdevkit/x86_64-w64-mingw32/lib/libffix64 -lffi -static-libgcc -static-libstdc++ -O3 -march=native -mtune=native 2> errorlib.log
+g++ -s -shared -DBUILD_SHARED -static -m64 -o crossbasic.dll ./CrossBasic-SRC/crossbasic.cpp ./CrossBasic-SRC/crossbasicdll.res -Lc:/crossbasicdevkit/x86_64-w64-mingw32/lib/libffix64 -lffi -static-libgcc -static-libstdc++ -O3 -march=native -mtune=native 2> errorlib.log
 
 :: Check if compilation was successful
 if %ERRORLEVEL% NEQ 0 (

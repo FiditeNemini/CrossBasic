@@ -7,9 +7,11 @@
 if [ "$(uname -s)" = "Darwin" ]; then
   echo "Detected macOS. Building SQLiteDatabase.dylib..."
   g++ -s -shared -fPIC -m64 -O3 -o SQLiteDatabase.dylib SQLiteDatabase.cpp -lsqlite3
+  cp SQLiteDatabase.dylib ../SQLiteStatement/SQLiteDatabase.dylib
   echo "Build complete: SQLiteDatabase.dylib"
 else
   echo "Detected Linux. Building SQLiteDatabase.so..."
   g++ -s -shared -fPIC -m64 -O3 -o SQLiteDatabase.so SQLiteDatabase.cpp -lsqlite3
+  cp SQLiteDatabase.so ../SQLiteStatement/SQLiteDatabase.so
   echo "Build complete: SQLiteDatabase.so"
 fi

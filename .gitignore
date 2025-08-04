@@ -27,3 +27,11 @@ workspace.code-workspace
 /Plugins/HTMLToMarkdown/target
 *.a
 /Website
+*.so
+release-64-linux/amortizationschedule.csv
+release-64-linux/example.txt
+release-64-linux/example.bin
+release-64-linux/mydb.sqlite
+release-64-linux/Scripts/code.txt
+/release-64-linux
+/release-64-windows
